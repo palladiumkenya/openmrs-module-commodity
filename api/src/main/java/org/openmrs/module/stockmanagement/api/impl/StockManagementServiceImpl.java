@@ -2411,13 +2411,13 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
 
     public StockInventoryResult getStockInventory(StockItemInventorySearchFilter filter) {
         HashSet<RecordPrivilegeFilter> recordPrivilegeFilters = null;
-
-        if (!filter.dispensing()) {
-            recordPrivilegeFilters = getRecordPrivilegeFilters(Context.getAuthenticatedUser(), null, null,
-                    Privileges.APP_STOCKMANAGEMENT_STOCKITEMS);
-            if (recordPrivilegeFilters == null || recordPrivilegeFilters.isEmpty())
-                return new StockInventoryResult(new ArrayList<>(), 0);
-        }
+        // Commented out to allow for stock inventory quantities to be viewed by all users
+        // if (!filter.dispensing()) {
+        //     recordPrivilegeFilters = getRecordPrivilegeFilters(Context.getAuthenticatedUser(), null, null,
+        //             Privileges.APP_STOCKMANAGEMENT_STOCKITEMS);
+        //     if (recordPrivilegeFilters == null || recordPrivilegeFilters.isEmpty())
+        //         return new StockInventoryResult(new ArrayList<>(), 0);
+        // }
         return getStockInventory(filter, recordPrivilegeFilters);
     }
 

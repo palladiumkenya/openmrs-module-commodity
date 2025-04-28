@@ -40,9 +40,6 @@ import org.openmrs.notification.Alert;
 import org.openmrs.notification.Template;
 import org.openmrs.util.OpenmrsConstants;
 import org.springframework.util.Assert;
-
-import liquibase.pro.packaged.s;
-
 import javax.mail.Session;
 import java.math.BigDecimal;
 import java.nio.file.Path;

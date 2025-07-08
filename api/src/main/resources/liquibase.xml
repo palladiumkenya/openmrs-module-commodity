@@ -4728,7 +4728,7 @@ CREATE TRIGGER stockmgmt_location_after_delete
   </changeSet>
 
   <changeSet author="makombe" id="stockmanagement-2024-05-22-1130">
-    <preConditions onFail="MARK_RAN">
+    <preConditions onError="WARN" onFail="MARK_RAN">
       <tableExists tableName="stockmgmt_stock_batch" />
       <not>
         <columnExists columnName="brand_name" tableName="stockmgmt_stock_batch"/>
@@ -4749,4 +4749,40 @@ CREATE TRIGGER stockmgmt_location_after_delete
       </column>
     </addColumn>
   </changeSet>
+  <changeSet author="makombe" id="stockmanagement-2025-07-08-1010">
+    <preConditions onError="WARN" onFail="MARK_RAN">
+      <tableExists tableName="stockmgmt_stock_item" />
+      <not>
+        <columnExists columnName="level_of_use" tableName="stockmgmt_stock_item"/>
+      </not>
+      <not>
+        <columnExists columnName="generic_concept_code" tableName="stockmgmt_stock_item"/>
+      </not>
+      <not>
+        <columnExists columnName="etcd_product_id" tableName="stockmgmt_stock_item"/>
+      </not>
+      <not>
+        <columnExists columnName="ppb_registration_code" tableName="stockmgmt_stock_item"/>
+      </not>
+    </preConditions>
+
+    <comment>
+      Adds columns 'level_of_use', 'generic_concept_code', 'etcd_product_id', and 'ppb_registration_code' to the 'stockmgmt_stock_item' table.
+    </comment>
+
+    <addColumn tableName="stockmgmt_stock_item">
+      <column name="level_of_use" type="varchar(255)">
+        <constraints nullable="true" />
+      </column>
+      <column name="generic_concept_code" type="varchar(255)">
+        <constraints nullable="true" />
+      </column>
+      <column name="etcd_product_id" type="varchar(255)">
+        <constraints nullable="true" />
+      </column>
+      <column name="ppb_registration_code" type="varchar(255)">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+</changeSet>
 </databaseChangeLog>

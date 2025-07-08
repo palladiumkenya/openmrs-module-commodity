@@ -4,6 +4,7 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.*;
 import io.swagger.models.properties.StringProperty;
+
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.*;
 import org.openmrs.api.ConceptService;
@@ -244,6 +245,10 @@ public class StockItemResource extends ResourceBase<StockItemDTO> {
 		description.addProperty("commonName");
 		description.addProperty("acronym");
 		description.addProperty("expiryNotice");
+		description.addProperty("levelOfUse");
+		description.addProperty("genericConceptCode");
+		description.addProperty("etcdProductId");
+		description.addProperty("ppbRegistrationCode");
 		return description;
 	}
 	
@@ -263,6 +268,10 @@ public class StockItemResource extends ResourceBase<StockItemDTO> {
 		description.addProperty("reorderLevel");
 		description.addProperty("reorderLevelUoMUuid");
 		description.addProperty("expiryNotice");
+		description.addProperty("levelOfUse");
+		description.addProperty("genericConceptCode");
+		description.addProperty("etcdProductId");
+		description.addProperty("ppbRegistrationCode");
 		return description;
 	}
 	
@@ -303,6 +312,10 @@ public class StockItemResource extends ResourceBase<StockItemDTO> {
 			description.addProperty("creatorFamilyName");
 			description.addProperty("voided");
 			description.addProperty("expiryNotice");
+			description.addProperty("levelOfUse");
+		    description.addProperty("genericConceptCode");
+		    description.addProperty("etcdProductId");
+			description.addProperty("ppbRegistrationCode");
 		}
 		
 		if (rep instanceof DefaultRepresentation) {
@@ -389,7 +402,11 @@ public class StockItemResource extends ResourceBase<StockItemDTO> {
 			        .property("reorderLevel", new DecimalProperty()).property("reorderLevelUoMUuid", new StringProperty())
 			        .property("reorderLevelUoMName", new StringProperty())
 			        .property("reorderLevelUoMFactor", new DecimalProperty())
-			        .property("expiryNotice", new IntegerProperty());
+			        .property("expiryNotice", new IntegerProperty())
+					.property("levelOfUse", new StringProperty())
+					.property("genericConceptCode", new StringProperty())
+					.property("etcdProductId", new StringProperty())
+					.property("ppbRegistrationCode", new StringProperty());
 		}
 		if (rep instanceof DefaultRepresentation) {}
 		

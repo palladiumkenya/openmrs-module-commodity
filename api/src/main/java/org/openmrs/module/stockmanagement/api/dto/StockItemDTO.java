@@ -1,16 +1,10 @@
 package org.openmrs.module.stockmanagement.api.dto;
 
-import org.openmrs.Concept;
-import org.openmrs.Drug;
-import org.openmrs.module.stockmanagement.api.model.StockBatch;
-import org.openmrs.module.stockmanagement.api.model.StockItemPackagingUOM;
-import org.openmrs.module.stockmanagement.api.model.StockItemReference;
-import org.openmrs.module.stockmanagement.api.model.StockSource;
 
+import org.openmrs.module.stockmanagement.api.model.StockItemReference;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 public class StockItemDTO {
 	
@@ -117,6 +111,16 @@ public class StockItemDTO {
 	private String categoryName;
 	
 	private Integer expiryNotice;
+	
+	private String genericConceptCode;
+
+	private String etcdProductId;
+
+	private String levelOfUse;
+	
+	private String ppbRegistrationCode;
+
+	
 	
 	public Integer getId() {
 		return id;
@@ -532,5 +536,30 @@ public class StockItemDTO {
 	
 	public void setReorderLevelUoMFactor(BigDecimal reorderLevelUoMFactor) {
 		this.reorderLevelUoMFactor = reorderLevelUoMFactor;
+	}
+
+	public String getGenericConceptCode() {
+		return genericConceptCode;
+	}
+	public void setGenericConceptCode(String genericConceptCode) {
+		this.genericConceptCode = genericConceptCode;
+	}
+	public String getEtcdProductId() {
+		return etcdProductId;
+	}
+	public void setEtcdProductId(String etcdProductId) {
+		this.etcdProductId = etcdProductId;
+	}
+	public String getLevelOfUse() {
+		return levelOfUse;
+	}
+	public void setLevelOfUse(String levelOfUse) {
+		this.levelOfUse = levelOfUse;
+	}
+	public String getPpbRegistrationCode() {
+		return ppbRegistrationCode;
+	}
+	public void setPpbRegistrationCode(String ppbRegistrationCode) {
+		this.ppbRegistrationCode = ppbRegistrationCode;
 	}
 }

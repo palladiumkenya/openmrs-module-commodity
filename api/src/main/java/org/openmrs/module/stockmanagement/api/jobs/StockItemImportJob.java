@@ -64,8 +64,12 @@ public class StockItemImportJob {
 	private int PURCHASE_PRICE_PUOM = 14;
 	
 	private int VENDOR_REFERENCE_ITEM_CODE = 15;
+    private int LEVEL_OF_USE = 16;
+    private int GENERIC_CONCEPT_CODE = 17;
+    private int ETCD_PRODUCT_ID = 18;
+    private int PPB_REGISTRATION_CODE = 19;
 	
-	private static Pattern NON_ASCII_PATTERN = Pattern.compile("[^A-Za-z0-9]");
+    private static Pattern NON_ASCII_PATTERN = Pattern.compile("[^A-Za-z0-9]");
 	
 	public StockItemImportJob(Path file, boolean hasHeader) {
         this.file = file;
@@ -89,7 +93,7 @@ public class StockItemImportJob {
 	
 	private Object validateLine(String[] line) {
         if (line == null || line.length == 0) return null;
-        Object[] objects = new Object[16];
+        Object[] objects = new Object[20];
         List<String> errors = new ArrayList<>();
         if (line.length < 3) {
             errors.add(Context.getMessageSourceService().getMessage("stockmanagement.importoperation.minimumfields"));
@@ -282,6 +286,21 @@ public class StockItemImportJob {
 
         if ((objects[PURCHASE_PRICE] != null || objects[PURCHASE_PRICE_PUOM] != null) && (objects[PURCHASE_PRICE] == null || objects[PURCHASE_PRICE_PUOM] == null)) {
             errors.add(Context.getMessageSourceService().getMessage("stockmanagement.importoperation.purchasepriceanduomrequired"));
+        }
+
+        if (line.length > LEVEL_OF_USE && !isBlank(line[LEVEL_OF_USE])) {
+            objects[LEVEL_OF_USE] = line[LEVEL_OF_USE];
+        }
+
+        if (line.length > GENERIC_CONCEPT_CODE && !isBlank(line[GENERIC_CONCEPT_CODE])) {
+            objects[GENERIC_CONCEPT_CODE] = line[GENERIC_CONCEPT_CODE];
+        }
+
+        if (line.length > ETCD_PRODUCT_ID && !isBlank(line[ETCD_PRODUCT_ID])) {
+            objects[ETCD_PRODUCT_ID] = line[ETCD_PRODUCT_ID];
+        }
+        if (line.length > PPB_REGISTRATION_CODE && !isBlank(line[PPB_REGISTRATION_CODE])) {
+            objects[PPB_REGISTRATION_CODE] = line[PPB_REGISTRATION_CODE];
         }
 
         return errors.isEmpty() ? objects : errors;
@@ -569,7 +588,7 @@ public class StockItemImportJob {
 
             if (COMMON_NAME < updates.length && updates[COMMON_NAME] != null) {
                 stockItem.setCommonName((String) updates[COMMON_NAME]);
-            }
+            }  
 
             if (ABBREVIATION < updates.length && updates[ABBREVIATION] != null) {
                 stockItem.setAcronym((String) updates[ABBREVIATION]);
@@ -718,6 +737,22 @@ public class StockItemImportJob {
                         purchasePriceToSet = (BigDecimal) updates[PURCHASE_PRICE];
                     }
                 }
+            }
+
+            if (LEVEL_OF_USE < updates.length && updates[LEVEL_OF_USE] != null) {
+                stockItem.setLevelOfUse((String) updates[LEVEL_OF_USE]);
+            }
+
+            if (GENERIC_CONCEPT_CODE < updates.length && updates[GENERIC_CONCEPT_CODE] != null) {
+                stockItem.setGenericConceptCode((String) updates[GENERIC_CONCEPT_CODE]);
+            }
+            
+            if (ETCD_PRODUCT_ID < updates.length && updates[ETCD_PRODUCT_ID] != null) {
+                stockItem.setEtcdProductId((String) updates[ETCD_PRODUCT_ID]);
+            }
+
+            if (PPB_REGISTRATION_CODE < updates.length && updates[PPB_REGISTRATION_CODE] != null) {
+                stockItem.setPpbRegistrationCode((String) updates[PPB_REGISTRATION_CODE]);
             }
 
             boolean saveStockItem = isVeryNewRecordDrug != null;

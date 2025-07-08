@@ -94,6 +94,18 @@ public class StockItem extends org.openmrs.BaseChangeableOpenmrsData implements 
 	
 	@Column(name = "expiry_notice", nullable = true)
 	private Integer expiryNotice;
+
+	@Column(name = "level_of_use", length = 255, nullable = true)
+	private String levelOfUse;
+
+	@Column(name = "generic_concept_code", length = 255, nullable = true)
+	private String genericConceptCode;
+
+	@Column(name = "etcd_product_id", length = 255, nullable = true)
+	private String etcdProductId;
+
+	@Column(name = "ppb_registration_code", length = 255, nullable = true)
+	private String ppbRegistrationCode;
 	
 	public StockItem() {
 	}
@@ -304,5 +316,31 @@ public class StockItem extends org.openmrs.BaseChangeableOpenmrsData implements 
 	
 	public void setExpiryNotice(Integer expiryNotice) {
 		this.expiryNotice = expiryNotice;
+	}
+
+	public String getLevelOfUse() {
+		return levelOfUse;
+	}
+	public void setLevelOfUse(String levelOfUse) {
+		this.levelOfUse = levelOfUse;	
+	}
+	public String getGenericConceptCode() {
+		return genericConceptCode;
+	}
+	public void setGenericConceptCode(String genericConceptCode) {
+		this.genericConceptCode = genericConceptCode;
+	}
+	public String getEtcdProductId() {
+		return etcdProductId;
+	}
+	public void setEtcdProductId(String etcdProductId) {
+		this.etcdProductId = etcdProductId;
+	}
+
+	public String getPpbRegistrationCode() {
+		return ppbRegistrationCode;
+	}
+	public void setPpbRegistrationCode(String ppbRegistrationCode) {
+		this.ppbRegistrationCode = ppbRegistrationCode;
 	}
 }

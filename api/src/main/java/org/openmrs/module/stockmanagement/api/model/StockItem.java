@@ -106,6 +106,10 @@ public class StockItem extends org.openmrs.BaseChangeableOpenmrsData implements 
 
 	@Column(name = "ppb_registration_code", length = 255, nullable = true)
 	private String ppbRegistrationCode;
+
+	@Column(name = "package_code", length = 255, nullable = true)
+	private String packageCode;
+
 	
 	public StockItem() {
 	}
@@ -342,5 +346,11 @@ public class StockItem extends org.openmrs.BaseChangeableOpenmrsData implements 
 	}
 	public void setPpbRegistrationCode(String ppbRegistrationCode) {
 		this.ppbRegistrationCode = ppbRegistrationCode;
+	}
+	public String getPackageCode() {
+		return packageCode;
+	}
+	public void setPackageCode(String packageCode) {
+		this.packageCode = packageCode;
 	}
 }

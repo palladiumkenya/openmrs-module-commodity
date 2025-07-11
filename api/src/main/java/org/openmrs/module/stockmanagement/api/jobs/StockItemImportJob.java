@@ -68,6 +68,7 @@ public class StockItemImportJob {
     private int GENERIC_CONCEPT_CODE = 17;
     private int ETCD_PRODUCT_ID = 18;
     private int PPB_REGISTRATION_CODE = 19;
+    private int PACKAGE_CODE = 20;
 	
     private static Pattern NON_ASCII_PATTERN = Pattern.compile("[^A-Za-z0-9]");
 	
@@ -93,7 +94,7 @@ public class StockItemImportJob {
 	
 	private Object validateLine(String[] line) {
         if (line == null || line.length == 0) return null;
-        Object[] objects = new Object[20];
+        Object[] objects = new Object[21];
         List<String> errors = new ArrayList<>();
         if (line.length < 3) {
             errors.add(Context.getMessageSourceService().getMessage("stockmanagement.importoperation.minimumfields"));
@@ -301,6 +302,9 @@ public class StockItemImportJob {
         }
         if (line.length > PPB_REGISTRATION_CODE && !isBlank(line[PPB_REGISTRATION_CODE])) {
             objects[PPB_REGISTRATION_CODE] = line[PPB_REGISTRATION_CODE];
+        }
+        if(line.length > PACKAGE_CODE && !isBlank(line[PACKAGE_CODE])) {
+            objects[PACKAGE_CODE] = line[PACKAGE_CODE];
         }
 
         return errors.isEmpty() ? objects : errors;
@@ -753,6 +757,10 @@ public class StockItemImportJob {
 
             if (PPB_REGISTRATION_CODE < updates.length && updates[PPB_REGISTRATION_CODE] != null) {
                 stockItem.setPpbRegistrationCode((String) updates[PPB_REGISTRATION_CODE]);
+            }
+
+            if (PACKAGE_CODE < updates.length && updates[PACKAGE_CODE] != null) {
+                stockItem.setPackageCode((String) updates[PACKAGE_CODE]);
             }
 
             boolean saveStockItem = isVeryNewRecordDrug != null;

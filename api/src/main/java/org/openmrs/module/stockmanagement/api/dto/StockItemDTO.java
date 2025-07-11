@@ -2,6 +2,7 @@ package org.openmrs.module.stockmanagement.api.dto;
 
 
 import org.openmrs.module.stockmanagement.api.model.StockItemReference;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -119,6 +120,9 @@ public class StockItemDTO {
 	private String levelOfUse;
 	
 	private String ppbRegistrationCode;
+
+	private String packageCode;
+	
 
 	
 	
@@ -561,5 +565,11 @@ public class StockItemDTO {
 	}
 	public void setPpbRegistrationCode(String ppbRegistrationCode) {
 		this.ppbRegistrationCode = ppbRegistrationCode;
+	}
+	public String getPackageCode() {
+		return packageCode;
+	}
+	public void setPackageCode(String packageCode) {
+		this.packageCode = packageCode;
 	}
 }

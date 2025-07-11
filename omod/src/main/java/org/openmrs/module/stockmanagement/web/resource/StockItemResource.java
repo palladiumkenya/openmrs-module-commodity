@@ -249,6 +249,7 @@ public class StockItemResource extends ResourceBase<StockItemDTO> {
 		description.addProperty("genericConceptCode");
 		description.addProperty("etcdProductId");
 		description.addProperty("ppbRegistrationCode");
+		description.addProperty("packageCode");
 		return description;
 	}
 	
@@ -272,6 +273,7 @@ public class StockItemResource extends ResourceBase<StockItemDTO> {
 		description.addProperty("genericConceptCode");
 		description.addProperty("etcdProductId");
 		description.addProperty("ppbRegistrationCode");
+		description.addProperty("packageCode");
 		return description;
 	}
 	
@@ -316,6 +318,7 @@ public class StockItemResource extends ResourceBase<StockItemDTO> {
 		    description.addProperty("genericConceptCode");
 		    description.addProperty("etcdProductId");
 			description.addProperty("ppbRegistrationCode");
+			description.addProperty("packageCode");
 		}
 		
 		if (rep instanceof DefaultRepresentation) {
@@ -406,7 +409,8 @@ public class StockItemResource extends ResourceBase<StockItemDTO> {
 					.property("levelOfUse", new StringProperty())
 					.property("genericConceptCode", new StringProperty())
 					.property("etcdProductId", new StringProperty())
-					.property("ppbRegistrationCode", new StringProperty());
+					.property("ppbRegistrationCode", new StringProperty())
+					.property("packageCode", new StringProperty());
 		}
 		if (rep instanceof DefaultRepresentation) {}
 		

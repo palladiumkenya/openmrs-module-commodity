@@ -39,7 +39,6 @@ import org.openmrs.module.stockmanagement.tasks.StockOperationNotificationTask;
 import org.openmrs.notification.Alert;
 import org.openmrs.notification.Template;
 import org.openmrs.util.OpenmrsConstants;
-import org.springframework.util.Assert;
 
 import javax.mail.Session;
 import java.math.BigDecimal;
@@ -126,11 +125,13 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
 
         final List<Location> stockLocations = locationService.getLocationsHavingAnyTag(locationTags);
         stockLocations.removeIf(p -> p.getRetired());
-        if (stockLocations.isEmpty()) return new ArrayList<>();
+        if (stockLocations.isEmpty())
+            return new ArrayList<>();
 
         PartySearchFilter partySearchFilter = new PartySearchFilter();
         partySearchFilter.setIncludeVoided(false);
-        partySearchFilter.setLocationIds(stockLocations.stream().map(p -> p.getLocationId()).collect(Collectors.toList()));
+        partySearchFilter
+                .setLocationIds(stockLocations.stream().map(p -> p.getLocationId()).collect(Collectors.toList()));
         return dao.findParty(partySearchFilter).getData();
     }
 
@@ -350,7 +351,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
     }
 
     public void voidUserRoleScopeOperationTypes(List<String> userRoleScopeOperationTypeIds, String reason,
-                                                int voidedBy) {
+            int voidedBy) {
         dao.voidUserRoleScopeOperationTypes(userRoleScopeOperationTypeIds, reason, voidedBy);
 
     }
@@ -360,7 +361,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
     }
 
     public List<Integer> searchStockItemCommonName(String text, Boolean isDrugSearch, boolean includeAll,
-                                                   int maxItems) {
+            int maxItems) {
         return dao.searchStockItemCommonName(text, isDrugSearch, includeAll, maxItems);
     }
 
@@ -577,7 +578,8 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         return findStockOperations(filter, recordPrivilegeFilters);
     }
 
-    public Result<StockOperationDTO> findStockOperations(StockOperationSearchFilter filter, HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
+    public Result<StockOperationDTO> findStockOperations(StockOperationSearchFilter filter,
+            HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
         Result<StockOperationDTO> result = dao.findStockOperations(filter, recordPrivilegeFilters);
         if (result.getData().isEmpty())
             return result;
@@ -746,12 +748,12 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
     }
 
     public boolean userHasStockManagementPrivilege(User user, Location location, StockOperationType stockOperationType,
-                                                   String stockManagementPrivilege) {
+            String stockManagementPrivilege) {
         return !getPrivilegeScopes(user, location, stockOperationType, stockManagementPrivilege).isEmpty();
     }
 
     public HashSet<RecordPrivilegeFilter> getRecordPrivilegeFilters(User user, Location location,
-                                                                    StockOperationType stockOperationType, String stockManagementPrivilege) {
+            StockOperationType stockOperationType, String stockManagementPrivilege) {
         HashSet<RecordPrivilegeFilter> target = new HashSet<>();
         List<Location> allLocations = Context.getLocationService().getAllLocations(true);
         HashMap<String, Integer> operationTypes = new HashMap<>();
@@ -802,14 +804,14 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
     }
 
     public HashSet<PrivilegeScope> getPrivilegeScopes(User user, Location location,
-                                                      StockOperationType stockOperationType,
-                                                      String stockManagementPrivilege) {
+            StockOperationType stockOperationType,
+            String stockManagementPrivilege) {
         return getPrivilegeScopes(user, location, stockOperationType, stockManagementPrivilege == null ? null
                 : Arrays.asList(stockManagementPrivilege));
     }
 
     public HashSet<PrivilegeScope> getPrivilegeScopes(User user, Location location,
-                                                      StockOperationType stockOperationType, List<String> stockManagementPrivileges) {
+            StockOperationType stockOperationType, List<String> stockManagementPrivileges) {
         HashSet<PrivilegeScope> target = new HashSet<>();
         Set<Role> allRoles = user.getAllRoles();
         List<PrivilegeScope> privilegeScopes = dao.getFlattenedUserRoleScopesByUser(user, allRoles, location,
@@ -867,8 +869,9 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         throw new StockManagementException(Context.getMessageSourceService().getMessage(messageKey));
     }
 
-    private void invalidRequestWithKey(String messageKey, String... args){
-        throw new StockManagementException(String.format(Context.getMessageSourceService().getMessage(messageKey), args));
+    private void invalidRequestWithKey(String messageKey, String... args) {
+        throw new StockManagementException(
+                String.format(Context.getMessageSourceService().getMessage(messageKey), args));
     }
 
     private void invalidRequest(String message, String... args) {
@@ -917,16 +920,16 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
             } else {
                 Optional<UserRoleScopeLocation> exisitingUserRoleScope = userRoleScope
                         .getUserRoleScopeLocations() != null ? userRoleScope.getUserRoleScopeLocations()
-                        .stream()
-                        .filter(p -> !p.getVoided() && p.getLocation().getUuid()
-                                .equalsIgnoreCase(userRoleScopeLocationDTO.getLocationUuid()))
-                        .findAny() : Optional.<UserRoleScopeLocation>empty();
+                                .stream()
+                                .filter(p -> !p.getVoided() && p.getLocation().getUuid()
+                                        .equalsIgnoreCase(userRoleScopeLocationDTO.getLocationUuid()))
+                                .findAny() : Optional.<UserRoleScopeLocation>empty();
                 if (exisitingUserRoleScope.isPresent()) {
                     if ((userRoleScopeLocationDTO.getEnableDescendants() == null &&
                             exisitingUserRoleScope.get().getEnableDescendants())
                             || (userRoleScopeLocationDTO.getEnableDescendants() != null
-                            && exisitingUserRoleScope.get().getEnableDescendants() != userRoleScopeLocationDTO
-                            .getEnableDescendants().booleanValue())) {
+                                    && exisitingUserRoleScope.get().getEnableDescendants() != userRoleScopeLocationDTO
+                                            .getEnableDescendants().booleanValue())) {
                         exisitingUserRoleScope.get()
                                 .setEnableDescendants(userRoleScopeLocationDTO.getEnableDescendants() == null ? false
                                         : userRoleScopeLocationDTO.getEnableDescendants());
@@ -946,11 +949,11 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         List<UserRoleScopeLocation> locationsToRemove = userRoleScope.getUserRoleScopeLocations() == null
                 ? new ArrayList<>()
                 : userRoleScope.getUserRoleScopeLocations()
-                .stream()
-                .filter(p -> !p.getVoided() && delegate.getLocations() != null
-                        && !delegate.getLocations().stream()
-                        .anyMatch(x -> x.getLocationUuid().equalsIgnoreCase(p.getLocation().getUuid())))
-                .collect(Collectors.toList());
+                        .stream()
+                        .filter(p -> !p.getVoided() && delegate.getLocations() != null
+                                && !delegate.getLocations().stream()
+                                        .anyMatch(x -> x.getLocationUuid().equalsIgnoreCase(p.getLocation().getUuid())))
+                        .collect(Collectors.toList());
 
         List<UserRoleScopeOperationType> stockOperationTypesToAdd = new ArrayList<>();
         List<StockOperationType> allStockOperationTypes = getAllStockOperationTypes();
@@ -966,10 +969,10 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
             } else {
                 Optional<UserRoleScopeOperationType> exisitingOperationType = userRoleScope
                         .getUserRoleScopeOperationTypes() != null ? userRoleScope.getUserRoleScopeOperationTypes()
-                        .stream()
-                        .filter(p -> !p.getVoided() && p.getStockOperationType().getUuid()
-                                .equalsIgnoreCase(userRoleScopeOperationTypeDTO.getOperationTypeUuid()))
-                        .findAny() : Optional.<UserRoleScopeOperationType>empty();
+                                .stream()
+                                .filter(p -> !p.getVoided() && p.getStockOperationType().getUuid()
+                                        .equalsIgnoreCase(userRoleScopeOperationTypeDTO.getOperationTypeUuid()))
+                                .findAny() : Optional.<UserRoleScopeOperationType>empty();
                 if (exisitingOperationType.isPresent())
                     continue;
                 UserRoleScopeOperationType userRoleScopeOperationType = new UserRoleScopeOperationType();
@@ -982,14 +985,14 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
 
         List<UserRoleScopeOperationType> stockOperationTypesToRemove = userRoleScope
                 .getUserRoleScopeOperationTypes() == null
-                ? new ArrayList<>()
-                : userRoleScope.getUserRoleScopeOperationTypes()
-                .stream()
-                .filter(p -> !p.getVoided() && delegate.getOperationTypes() != null
-                        && !delegate.getOperationTypes().stream()
-                        .anyMatch(x -> x.getOperationTypeUuid()
-                                .equalsIgnoreCase(p.getStockOperationType().getUuid())))
-                .collect(Collectors.toList());
+                        ? new ArrayList<>()
+                        : userRoleScope.getUserRoleScopeOperationTypes()
+                                .stream()
+                                .filter(p -> !p.getVoided() && delegate.getOperationTypes() != null
+                                        && !delegate.getOperationTypes().stream()
+                                                .anyMatch(x -> x.getOperationTypeUuid()
+                                                        .equalsIgnoreCase(p.getStockOperationType().getUuid())))
+                                .collect(Collectors.toList());
 
         saveUserRoleScope(userRoleScope);
 
@@ -1235,7 +1238,8 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
 
         StockOperationLink stockOperationLink = null;
         if (isNew) {
-            if(stockOperationType.canBeRelatedToRequisition() && !StringUtils.isBlank(dto.getRequisitionStockOperationUuid())){
+            if (stockOperationType.canBeRelatedToRequisition()
+                    && !StringUtils.isBlank(dto.getRequisitionStockOperationUuid())) {
                 StockOperation parentStockOperation = getStockOperationByUuid(dto.getRequisitionStockOperationUuid());
                 if (parentStockOperation != null) {
                     stockOperationLink = new StockOperationLink();
@@ -1243,14 +1247,15 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                     stockOperationLink.setCreator(Context.getAuthenticatedUser());
                     stockOperationLink.setDateCreated(new Date());
                 } else {
-                    throw new StockManagementException(messageSourceService.getMessage("stockmanagement.stockoperation.requisitionstocksperationnnotfound"));
+                    throw new StockManagementException(messageSourceService
+                            .getMessage("stockmanagement.stockoperation.requisitionstocksperationnnotfound"));
                 }
-            }else if(StockOperationType.STOCK_ISSUE.equals(stockOperationType.getOperationType()) && !GlobalProperties.allowStockIssueWithoutRequisition()){
-                throw new StockManagementException(messageSourceService.getMessage("stockmanagement.stockoperation.requisitionstocksperationnrequired"));
+            } else if (StockOperationType.STOCK_ISSUE.equals(stockOperationType.getOperationType())
+                    && !GlobalProperties.allowStockIssueWithoutRequisition()) {
+                throw new StockManagementException(messageSourceService
+                        .getMessage("stockmanagement.stockoperation.requisitionstocksperationnrequired"));
             }
         }
-
-
 
         List<StockBatch> newStockBatches = new ArrayList<>();
         List<StockOperationItem> newStockOperationItems = new ArrayList<>();
@@ -1273,6 +1278,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
 
         List<StockOperationItem> stockOperationItems = isNew ? new ArrayList<>()
                 : getStockOperationItemsByStockOperation(stockOperation.getId());
+
         for (StockOperationItemDTO itemDto : dto.getStockOperationItems()) {
             StockOperationItem item = null;
             boolean isStockItemNew = isNew || StringUtils.isBlank(itemDto.getUuid());
@@ -1320,7 +1326,32 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
             if (isStockItemNew) {
                 item.setStockItem(stockItem);
             }
-            if (stockOperationType.requiresBatchUuid()) {
+
+            // MODIFIED SECTION: Handle batch requirements with zero quantity support
+            boolean isStockIssue = StockOperationType.STOCK_ISSUE.equals(stockOperationType.getOperationType());
+            boolean isZeroQuantity = itemDto.getQuantity() != null
+                    && itemDto.getQuantity().compareTo(BigDecimal.ZERO) == 0;
+            boolean hasNoBatch = StringUtils.isBlank(itemDto.getStockBatchUuid()) &&
+                    StringUtils.isBlank(itemDto.getBatchNo());
+
+            // Allow zero quantity stock issues without batch
+            if (isStockIssue && isZeroQuantity && hasNoBatch) {
+                // Set unfulfillment tracking if available in DTO
+                // if (itemDto.getUnfulfillmentReason() != null) {
+                // item.setUnfulfillmentReason(itemDto.getUnfulfillmentReason());
+                // }
+                // if (itemDto.getUnfulfillmentRemarks() != null) {
+                // item.setUnfulfillmentRemarks(itemDto.getUnfulfillmentRemarks());
+                // }
+                // Skip batch assignment for zero quantity issues
+                item.setStockBatch(null);
+            } else if (stockOperationType.requiresBatchUuid()) {
+                // Original logic: Batch UUID is required
+                if (StringUtils.isBlank(itemDto.getStockBatchUuid())) {
+                    throw new StockManagementException(String.format(
+                            messageSourceService.getMessage("stockmanagement.stockoperation.stockbatchrequired"),
+                            itemDto.getStockItemUuid()));
+                }
                 StockBatch stockBatch = getStockBatchByUuid(itemDto.getStockBatchUuid());
                 if (stockBatch == null) {
                     throw new StockManagementException(String.format(
@@ -1329,6 +1360,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                 }
                 item.setStockBatch(stockBatch);
             } else if (stockOperationType.requiresActualBatchInformation()) {
+                // Original logic: Actual batch information required
                 {
                     StockBatch stockBatch = findStockBatch(stockItem, itemDto.getBatchNo(), itemDto.getExpiration());
                     if (stockBatch == null) {
@@ -1355,7 +1387,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                             stockBatch.setDateCreated(new Date());
                             stockBatchMapping.putIfAbsent(item.getUuid(), stockBatch);
                         }
-                    }else{
+                    } else {
                         stockBatchMapping.putIfAbsent(item.getUuid(), stockBatch);
                     }
                 }
@@ -1364,8 +1396,11 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                 }
             }
 
-            if (isStockItemNew && stockOperationType.getOperationType().equals(StockOperationType.STOCK_ISSUE)) {
+            if (isStockItemNew && isStockIssue) {
                 if (itemDto.getQuantityRequested() != null) {
+                    System.out.println(
+                            "Setting quantity requested for stock issue operation============================================"
+                                    + itemDto.getQuantityRequested());
                     item.setQuantityRequested(itemDto.getQuantityRequested());
                     Optional<StockItemPackagingUOM> stockItemPackagingUOMOptional = preloadStockItemPackagingUOMs
                             .stream()
@@ -1379,7 +1414,6 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                     }
                     item.setQuantityRequestedPackagingUOM(stockItemPackagingUOMOptional.get());
                 }
-
             }
             newStockOperationItems.add(item);
         }
@@ -1429,19 +1463,22 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
             if (party == null)
                 return new Result<>(new ArrayList<>(), 0);
 
-            List<StockItemInventorySearchFilter.ItemGroupFilter> itemsToSearch = stockBatchDTOResult.getData().stream().map(p ->
-            {
-                StockItemInventorySearchFilter.ItemGroupFilter k = new StockItemInventorySearchFilter.ItemGroupFilter();
-                k.setStockItemUuid(filter.getStockItemUuid());
-                k.setStockBatchIds(Arrays.asList(p.getId()));
-                k.setPartyIds(Arrays.asList(party.getId()));
-                return k;
-            }).collect(Collectors.toList());
+            List<StockItemInventorySearchFilter.ItemGroupFilter> itemsToSearch = stockBatchDTOResult.getData().stream()
+                    .map(p -> {
+                        StockItemInventorySearchFilter.ItemGroupFilter k = new StockItemInventorySearchFilter.ItemGroupFilter();
+                        k.setStockItemUuid(filter.getStockItemUuid());
+                        k.setStockBatchIds(Arrays.asList(p.getId()));
+                        k.setPartyIds(Arrays.asList(party.getId()));
+                        return k;
+                    }).collect(Collectors.toList());
 
             StockItemInventorySearchFilter searchFilter = new StockItemInventorySearchFilter();
             searchFilter.setItemGroupFilters(itemsToSearch);
             List<StockItemInventory> stockItemInventories = dao.getStockItemInventory(searchFilter, null).getData();
-            stockBatchDTOResult.setData(stockBatchDTOResult.getData().stream().filter(p -> stockItemInventories.stream().anyMatch(x -> x.getStockBatchId().equals(p.getId()) && (!filter.getExcludeEmptyStock() || x.getQuantity().compareTo(BigDecimal.ZERO) > 0))).collect(Collectors.toList()));
+            stockBatchDTOResult.setData(stockBatchDTOResult.getData().stream()
+                    .filter(p -> stockItemInventories.stream().anyMatch(x -> x.getStockBatchId().equals(p.getId())
+                            && (!filter.getExcludeEmptyStock() || x.getQuantity().compareTo(BigDecimal.ZERO) > 0)))
+                    .collect(Collectors.toList()));
         }
 
         return stockBatchDTOResult;
@@ -1497,7 +1534,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
     }
 
     public void stockOperationItemsReceived(StockOperationDTO stockOperationDTO,
-                                            List<StockOperationActionLineItem> lineItems) {
+            List<StockOperationActionLineItem> lineItems) {
         if (lineItems == null || lineItems.isEmpty())
             return;
         StockOperation stockOperation = getStockOperationByUuid(stockOperationDTO.getUuid());
@@ -1624,11 +1661,27 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
     }
 
     private void validateStockInventoryAfterOperation(StockOperation stockOperation,
-                                                      StockOperationType stockOperationType, MessageSourceService messageSourceService) {
+            StockOperationType stockOperationType, MessageSourceService messageSourceService) {
         List<StockOperationItem> applicableStockOperationItems = stockOperation.getStockOperationItems().stream()
-                .filter(p -> !p.getVoided()).collect(Collectors.toList());
+                .filter(p -> !p.getVoided())
+                // Skip items where BOTH batch is null AND quantity is zero/null - they don't
+                // affect inventory
+                .filter(p -> {
+                    boolean hasNullBatch = p.getStockBatch() == null;
+                    boolean hasZeroOrNullQuantity = p.getQuantity() == null
+                            || p.getQuantity().compareTo(BigDecimal.ZERO) == 0;
+                    // Skip only if BOTH conditions are true
+                    return !(hasNullBatch && hasZeroOrNullQuantity);
+                })
+                .collect(Collectors.toList());
+
+        // If no applicable items, skip validation
+        if (applicableStockOperationItems.isEmpty()) {
+            return;
+        }
+
         List<StockItemInventorySearchFilter.ItemGroupFilter> itemsToSearch = applicableStockOperationItems.stream()
-                .filter(p -> !p.getVoided()).map(p -> {
+                .map(p -> {
                     StockItemInventorySearchFilter.PartyStockItemBatch group = new StockItemInventorySearchFilter.PartyStockItemBatch(
                             stockOperation.getSource().getId(),
                             p.getStockItem().getId(),
@@ -1643,7 +1696,8 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
 
         StockItemInventorySearchFilter searchFilter = new StockItemInventorySearchFilter();
         searchFilter.setItemGroupFilters(itemsToSearch);
-        if(stockOperationType.getAllowExpiredBatchNumbers() != null && stockOperationType.getAllowExpiredBatchNumbers()){
+        if (stockOperationType.getAllowExpiredBatchNumbers() != null
+                && stockOperationType.getAllowExpiredBatchNumbers()) {
             searchFilter.setRequireNonExpiredStockBatches(false);
         }
         List<StockItemInventory> stockItemInventories = dao.getStockItemInventory(searchFilter, null).getData();
@@ -1703,8 +1757,13 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                     uomFilter.setStockItemIds(Arrays.asList(stockOperationItem.getStockItem().getId()));
                     Result<StockItemPackagingUOMDTO> uoms = findStockItemPackagingUOMs(uomFilter);
                     if (!uoms.getData().isEmpty()) {
-                        StockItemPackagingUOMDTO preferredUoM = getPreferredPackagingUoM(netEffectBalance, uoms.getData(),false,uomPriorityIsBigToSmall,stockOperationItem.getStockItemPackagingUOM() != null ? stockOperationItem.getStockItemPackagingUOM().getId() : null);
-                        displayUnitValue = netEffectBalance.divide(preferredUoM.getFactor(), 5, BigDecimal.ROUND_HALF_EVEN);
+                        StockItemPackagingUOMDTO preferredUoM = getPreferredPackagingUoM(netEffectBalance,
+                                uoms.getData(), false, uomPriorityIsBigToSmall,
+                                stockOperationItem.getStockItemPackagingUOM() != null
+                                        ? stockOperationItem.getStockItemPackagingUOM().getId()
+                                        : null);
+                        displayUnitValue = netEffectBalance.divide(preferredUoM.getFactor(), 5,
+                                BigDecimal.ROUND_HALF_EVEN);
                         displayUom = preferredUoM.getPackagingUomName();
                     }
                 }
@@ -1729,7 +1788,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
     }
 
     private List<ReservedTransaction> calculateStockIssueAdjustments(StockOperation stockOperation,
-                                                                     StockOperationType stockOperationType, MessageSourceService messageSourceService) {
+            StockOperationType stockOperationType, MessageSourceService messageSourceService) {
         List<StockOperationItem> applicableStockOperationItems = stockOperation.getStockOperationItems().stream()
                 .filter(p -> !p.getVoided()).collect(Collectors.toList());
         List<StockItemInventorySearchFilter.ItemGroupFilter> itemsToSearch = applicableStockOperationItems.stream()
@@ -1793,9 +1852,14 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                 uomFilter.setStockItemIds(Arrays.asList(itemGroupItems.get(0).getStockItem().getId()));
                 Result<StockItemPackagingUOMDTO> uoms = findStockItemPackagingUOMs(uomFilter);
                 if (!uoms.getData().isEmpty()) {
-                    StockItemPackagingUOMDTO preferredUoM = getPreferredPackagingUoM(absAdjustment,uoms.getData(),false,uomPriorityIsBigToSmall,itemGroupItems.get(0).getStockItemPackagingUOM() != null ? itemGroupItems.get(0).getStockItemPackagingUOM().getId() : null);
+                    StockItemPackagingUOMDTO preferredUoM = getPreferredPackagingUoM(absAdjustment, uoms.getData(),
+                            false, uomPriorityIsBigToSmall,
+                            itemGroupItems.get(0).getStockItemPackagingUOM() != null
+                                    ? itemGroupItems.get(0).getStockItemPackagingUOM().getId()
+                                    : null);
                     finalAdjustmentUom = dao.getStockItemPackagingUOMByUuid(preferredUoM.getUuid());
-                    finalAdjustmentUnitValue = adjustment.divide(preferredUoM.getFactor(), 5, BigDecimal.ROUND_HALF_EVEN);
+                    finalAdjustmentUnitValue = adjustment.divide(preferredUoM.getFactor(), 5,
+                            BigDecimal.ROUND_HALF_EVEN);
                 }
             }
 
@@ -1840,7 +1904,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
     }
 
     private void processStockOperationAction(StockOperationDTO stockOperationDTO, StockOperationAction.Action action,
-                                             String reason, Function<StockOperation, Pair<String, StockOperationPrivelegeTarget>> getRequiredPrivilege) {
+            String reason, Function<StockOperation, Pair<String, StockOperationPrivelegeTarget>> getRequiredPrivilege) {
         StockOperationType stockOperationType;
         synchronized (STOCK_OPERATION_PROCESSING_LOCK) {
             MessageSourceService messageSourceService = Context.getMessageSourceService();
@@ -1867,7 +1931,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
             } else if (action.equals(StockOperationAction.Action.DISPATCH)) {
                 if (!((stockOperation.isUpdateable()
                         || stockOperation.getStatus().equals(StockOperationStatus.SUBMITTED)) && stockOperation
-                        .getStockOperationType().requiresDispatchAcknowledgement())) {
+                                .getStockOperationType().requiresDispatchAcknowledgement())) {
                     throw new StockManagementException(
                             messageSourceService.getMessage("stockmanagement.stockoperation.notdispatcheable"));
                 }
@@ -1928,7 +1992,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
 
             if (location == null
                     || !stockOperationType.userCanProcess(Context.getAuthenticatedUser(), location,
-                    requiredPrivilege.getValue1())) {
+                            requiredPrivilege.getValue1())) {
                 throw new StockManagementException(
                         messageSourceService.getMessage("stockmanagement.stockoperation.nopermission"));
             }
@@ -1936,7 +2000,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
             List<ReservedTransaction> reservedTransactions = null;
             if (action == StockOperationAction.Action.SUBMIT
                     || (stockOperation.isUpdateable() && (action.equals(StockOperationAction.Action.COMPLETE) || action
-                    .equals(StockOperationAction.Action.DISPATCH)))) {
+                            .equals(StockOperationAction.Action.DISPATCH)))) {
                 if (!stockOperationType.isQuantityOptional()) {
                     if (stockOperationType.shouldVerifyNegativeStockAmountsAtSource()
                             && !GlobalProperties.getNegativeStockBalanceAllowed() && stockOperation.getSource() != null
@@ -1956,7 +2020,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         }
 
         boolean notify = false;
-        switch (action){
+        switch (action) {
             case SUBMIT:
                 notify = stockOperationType.getNotifySubmitted();
                 break;
@@ -1979,23 +2043,24 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                 notify = stockOperationType.getNotifyCancelled();
                 break;
         }
-        if(notify){
+        if (notify) {
             try {
-                StockOperationNotificationTask stockOperationNotificationTask = new StockOperationNotificationTask(stockOperationDTO.getUuid(), action, reason, Context.getAuthenticatedUser().getUserId());
+                StockOperationNotificationTask stockOperationNotificationTask = new StockOperationNotificationTask(
+                        stockOperationDTO.getUuid(), action, reason, Context.getAuthenticatedUser().getUserId());
                 stockOperationNotificationTask.fireAndForget();
-            }catch (Exception exception){
+            } catch (Exception exception) {
                 log.error(exception);
             }
         }
     }
 
     public void processStockOperationAction(StockOperationAction.Action action, String reason,
-                                            StockOperation stockOperation, StockOperationType stockOperationType,
-                                            MessageSourceService messageSourceService,
-                                            List<ReservedTransaction> reservedTransactions) {
+            StockOperation stockOperation, StockOperationType stockOperationType,
+            MessageSourceService messageSourceService,
+            List<ReservedTransaction> reservedTransactions) {
         if (action.equals(StockOperationAction.Action.SUBMIT)
                 || (stockOperation.isUpdateable() && (action.equals(StockOperationAction.Action.COMPLETE) || action
-                .equals(StockOperationAction.Action.DISPATCH)))) {
+                        .equals(StockOperationAction.Action.DISPATCH)))) {
             if (!stockOperationType.isQuantityOptional()) {
                 if (StockOperationType.STOCKTAKE.equals(stockOperationType.getOperationType())) {
                     // reserved transactions
@@ -2006,6 +2071,29 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                     for (StockOperationItem item : stockOperation.getStockOperationItems()) {
                         if (item.getVoided())
                             continue;
+
+                        // CRITICAL FIX: Skip transaction creation for zero-quantity items without batch
+                        boolean isZeroQuantity = item.getQuantity() == null
+                                || item.getQuantity().compareTo(BigDecimal.ZERO) == 0;
+                        boolean hasNoBatch = item.getStockBatch() == null;
+
+                        if (isZeroQuantity && hasNoBatch) {
+                            // Log this for tracking unfulfilled items
+                            if (log.isDebugEnabled()) {
+                                log.debug(String.format(
+                                        "Skipping transaction creation for zero-quantity item without batch: %s in operation: %s",
+                                        item.getUuid(), stockOperation.getOperationNumber()));
+                            }
+                            continue; // Skip creating transaction for this item
+                        }
+
+                        // Validate that non-zero quantities must have a batch
+                        if (!isZeroQuantity && hasNoBatch) {
+                            throw new StockManagementException(String.format(
+                                    messageSourceService
+                                            .getMessage("stockmanagement.stockoperation.stockbatchrequired"),
+                                    item.getStockItem().getId()));
+                        }
 
                         ReservedTransaction tx = new ReservedTransaction(stockOperation, item);
                         tx.setCreator(Context.getAuthenticatedUser());
@@ -2340,8 +2428,10 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                             uomFilter.setStockItemIds(Arrays.asList(stockItem.getId()));
                             Result<StockItemPackagingUOMDTO> uoms = findStockItemPackagingUOMs(uomFilter);
                             if (!uoms.getData().isEmpty()) {
-                                StockItemPackagingUOMDTO preferredUoM = getPreferredPackagingUoM(netEffectBalance,uoms.getData(),true,uomPriorityIsBigToSmall,null);
-                                displayUnitValue = netEffectBalance.divide(preferredUoM.getFactor(), 5, BigDecimal.ROUND_HALF_EVEN);
+                                StockItemPackagingUOMDTO preferredUoM = getPreferredPackagingUoM(netEffectBalance,
+                                        uoms.getData(), true, uomPriorityIsBigToSmall, null);
+                                displayUnitValue = netEffectBalance.divide(preferredUoM.getFactor(), 5,
+                                        BigDecimal.ROUND_HALF_EVEN);
                                 displayUom = preferredUoM.getPackagingUomName();
                             }
                         }
@@ -2396,15 +2486,20 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         List<StockItemInventory> result = dao.getStockBatchLocationInventory(stockBatchIds);
         if (!result.isEmpty()) {
             StockItemPackagingUOMSearchFilter uomFilter = new StockItemPackagingUOMSearchFilter();
-            uomFilter.setStockItemIds(result.stream().map(p -> p.getStockItemId()).filter(p -> p != null).collect(Collectors.toList()));
-            Map<Integer, List<StockItemPackagingUOMDTO>> uoms = findStockItemPackagingUOMs(uomFilter).getData().stream().collect(Collectors.groupingBy(StockItemPackagingUOMDTO::getStockItemId));
+            uomFilter.setStockItemIds(
+                    result.stream().map(p -> p.getStockItemId()).filter(p -> p != null).collect(Collectors.toList()));
+            Map<Integer, List<StockItemPackagingUOMDTO>> uoms = findStockItemPackagingUOMs(uomFilter).getData().stream()
+                    .collect(Collectors.groupingBy(StockItemPackagingUOMDTO::getStockItemId));
             if (!uoms.isEmpty()) {
                 boolean uomPriorityIsBigToSmall = GlobalProperties.uomPriorityIsBigToSmall();
                 for (Map.Entry<Integer, List<StockItemPackagingUOMDTO>> entry : uoms.entrySet()) {
-                    for (StockItemInventory stockItemInventory : result.stream().filter(p -> p.getStockItemId().equals(entry.getKey())).collect(Collectors.toList())) {
+                    for (StockItemInventory stockItemInventory : result.stream()
+                            .filter(p -> p.getStockItemId().equals(entry.getKey())).collect(Collectors.toList())) {
                         List<StockItemPackagingUOMDTO> uomList = entry.getValue();
-                        StockItemPackagingUOMDTO preferredUoM = getPreferredPackagingUoM(stockItemInventory.getQuantity(), uomList, false, uomPriorityIsBigToSmall, null);
-                        stockItemInventory.setQuantity(stockItemInventory.getQuantity().divide(preferredUoM.getFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+                        StockItemPackagingUOMDTO preferredUoM = getPreferredPackagingUoM(
+                                stockItemInventory.getQuantity(), uomList, false, uomPriorityIsBigToSmall, null);
+                        stockItemInventory.setQuantity(stockItemInventory.getQuantity().divide(preferredUoM.getFactor(),
+                                5, BigDecimal.ROUND_HALF_EVEN));
                         stockItemInventory.setQuantityUoM(preferredUoM.getPackagingUomName());
                         stockItemInventory.setQuantityUoMUuid(preferredUoM.getUuid());
                         stockItemInventory.setStockItemUuid(stockItemInventory.getStockItemUuid());
@@ -2418,17 +2513,20 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
 
     public StockInventoryResult getStockInventory(StockItemInventorySearchFilter filter) {
         HashSet<RecordPrivilegeFilter> recordPrivilegeFilters = null;
-        // Commented out to allow for stock inventory quantities to be viewed by all users
+        // Commented out to allow for stock inventory quantities to be viewed by all
+        // users
         // if (!filter.dispensing()) {
-        //     recordPrivilegeFilters = getRecordPrivilegeFilters(Context.getAuthenticatedUser(), null, null,
-        //             Privileges.APP_STOCKMANAGEMENT_STOCKITEMS);
-        //     if (recordPrivilegeFilters == null || recordPrivilegeFilters.isEmpty())
-        //         return new StockInventoryResult(new ArrayList<>(), 0);
+        // recordPrivilegeFilters =
+        // getRecordPrivilegeFilters(Context.getAuthenticatedUser(), null, null,
+        // Privileges.APP_STOCKMANAGEMENT_STOCKITEMS);
+        // if (recordPrivilegeFilters == null || recordPrivilegeFilters.isEmpty())
+        // return new StockInventoryResult(new ArrayList<>(), 0);
         // }
         return getStockInventory(filter, recordPrivilegeFilters);
     }
 
-    public StockInventoryResult getStockInventory(StockItemInventorySearchFilter filter, HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
+    public StockInventoryResult getStockInventory(StockItemInventorySearchFilter filter,
+            HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
         if (filter == null || (recordPrivilegeFilters != null && recordPrivilegeFilters.isEmpty())) {
             return new StockInventoryResult(new ArrayList<>(), 0);
         }
@@ -2436,25 +2534,29 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         return postProcessInventoryResult(filter, result);
     }
 
-    public StockInventoryResult postProcessInventoryResult(StockItemInventorySearchFilter filter, StockInventoryResult result) {
+    public StockInventoryResult postProcessInventoryResult(StockItemInventorySearchFilter filter,
+            StockInventoryResult result) {
         Map<Integer, String> partyNames = null;
         Map<Integer, StockBatchDTO> stockBatchNames = null;
         if (!result.getData().isEmpty()) {
             if (filter.getDoSetPartyNameField()) {
-                List<Integer> partyIds = result.getData().stream().filter(p -> p.getPartyId() != null).map(p -> p.getPartyId()).distinct().collect(Collectors.toList());
+                List<Integer> partyIds = result.getData().stream().filter(p -> p.getPartyId() != null)
+                        .map(p -> p.getPartyId()).distinct().collect(Collectors.toList());
                 if (!partyIds.isEmpty()) {
                     partyNames = dao.getPartyNames(partyIds);
                 }
             }
 
             if (filter.getDoSetBatchFields()) {
-                List<Integer> batchIds = result.getData().stream().filter(p -> p.getStockBatchId() != null).map(p -> p.getStockBatchId()).distinct().collect(Collectors.toList());
+                List<Integer> batchIds = result.getData().stream().filter(p -> p.getStockBatchId() != null)
+                        .map(p -> p.getStockBatchId()).distinct().collect(Collectors.toList());
                 if (!batchIds.isEmpty()) {
                     StockBatchSearchFilter stockBatchSearchFilter = new StockBatchSearchFilter();
                     stockBatchSearchFilter.setStockBatchIds(batchIds);
                     Result<StockBatchDTO> stockBatches = dao.findStockBatches(stockBatchSearchFilter);
                     if (!stockBatches.getData().isEmpty()) {
-                        stockBatchNames = stockBatches.getData().stream().collect(Collectors.toMap(StockBatchDTO::getId, p -> p));
+                        stockBatchNames = stockBatches.getData().stream()
+                                .collect(Collectors.toMap(StockBatchDTO::getId, p -> p));
                     }
                 }
             }
@@ -2479,35 +2581,38 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
             if (filter.getTotalBy() != null) {
                 switch (filter.getTotalBy()) {
                     case LocationStockItem:
-                        result.setTotals(result.getData().stream().collect(Collectors.groupingBy(p -> new Pair<>(p.getPartyId(), p.getStockItemId())))
-                                        .entrySet()
-                                        .stream()
-                                        .map(p -> {
-                                            StockItemInventory stockItemInventory = new StockItemInventory();
-                                            StockItemInventory inventory = p.getValue().get(0);
-                                            stockItemInventory.setPartyId(inventory.getPartyId());
-                                            stockItemInventory.setLocationUuid(inventory.getLocationUuid());
-                                            stockItemInventory.setStockItemId(inventory.getStockItemId());
-                                            stockItemInventory.setQuantity(p.getValue().stream().map(x -> x.getQuantity()).reduce(BigDecimal.ZERO, BigDecimal::add));
-                                            return stockItemInventory;
-                                        }).collect(Collectors.toList())
-                        );
+                        result.setTotals(result.getData().stream()
+                                .collect(Collectors.groupingBy(p -> new Pair<>(p.getPartyId(), p.getStockItemId())))
+                                .entrySet()
+                                .stream()
+                                .map(p -> {
+                                    StockItemInventory stockItemInventory = new StockItemInventory();
+                                    StockItemInventory inventory = p.getValue().get(0);
+                                    stockItemInventory.setPartyId(inventory.getPartyId());
+                                    stockItemInventory.setLocationUuid(inventory.getLocationUuid());
+                                    stockItemInventory.setStockItemId(inventory.getStockItemId());
+                                    stockItemInventory.setQuantity(p.getValue().stream().map(x -> x.getQuantity())
+                                            .reduce(BigDecimal.ZERO, BigDecimal::add));
+                                    return stockItemInventory;
+                                }).collect(Collectors.toList()));
                         break;
                     case LocationStockItemBatchNo:
                         result.setTotals(result.getData());
                         break;
                     case StockItemOnly:
-                        result.setTotals(result.getData().stream().collect(Collectors.groupingBy(p -> p.getStockItemId()))
+                        result.setTotals(
+                                result.getData().stream().collect(Collectors.groupingBy(p -> p.getStockItemId()))
                                         .entrySet()
                                         .stream()
                                         .map(p -> {
                                             StockItemInventory stockItemInventory = new StockItemInventory();
                                             StockItemInventory inventory = p.getValue().get(0);
                                             stockItemInventory.setStockItemId(inventory.getStockItemId());
-                                            stockItemInventory.setQuantity(p.getValue().stream().map(x -> x.getQuantity()).reduce(BigDecimal.ZERO, BigDecimal::add));
+                                            stockItemInventory
+                                                    .setQuantity(p.getValue().stream().map(x -> x.getQuantity())
+                                                            .reduce(BigDecimal.ZERO, BigDecimal::add));
                                             return stockItemInventory;
-                                        }).collect(Collectors.toList())
-                        );
+                                        }).collect(Collectors.toList()));
                         break;
                 }
             }
@@ -2515,45 +2620,60 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
             if (filter.getDoSetQuantityUoM()) {
                 boolean uomPriorityIsBigToSmall = GlobalProperties.uomPriorityIsBigToSmall();
                 StockItemPackagingUOMSearchFilter uomFilter = new StockItemPackagingUOMSearchFilter();
-                uomFilter.setStockItemIds(result.getData().stream().map(p -> p.getStockItemId()).filter(p -> p != null).collect(Collectors.toList()));
+                uomFilter.setStockItemIds(result.getData().stream().map(p -> p.getStockItemId()).filter(p -> p != null)
+                        .collect(Collectors.toList()));
                 if (filter.dispensing()) {
                     uomFilter.setIncludeDispensingUnit(true);
                 }
                 if (!uomFilter.getStockItemIds().isEmpty()) {
-                    Map<Integer, List<StockItemPackagingUOMDTO>> uoms = findStockItemPackagingUOMs(uomFilter).getData().stream().collect(Collectors.groupingBy(StockItemPackagingUOMDTO::getStockItemId));
+                    Map<Integer, List<StockItemPackagingUOMDTO>> uoms = findStockItemPackagingUOMs(uomFilter).getData()
+                            .stream().collect(Collectors.groupingBy(StockItemPackagingUOMDTO::getStockItemId));
                     if (!uoms.isEmpty()) {
 
                         for (Map.Entry<Integer, List<StockItemPackagingUOMDTO>> entry : uoms.entrySet()) {
-                            // When dispensing, trim non-dispensing units if the stock item has a unit for dispensing already setup.
+                            // When dispensing, trim non-dispensing units if the stock item has a unit for
+                            // dispensing already setup.
                             if (filter.dispensing()) {
-                                Optional<StockItemPackagingUOMDTO> dispensingUnit = entry.getValue().stream().filter(p -> p.getIsDispensingUnit() && p.getStockItemDispensingUnitId() != null).findFirst();
+                                Optional<StockItemPackagingUOMDTO> dispensingUnit = entry.getValue().stream().filter(
+                                        p -> p.getIsDispensingUnit() && p.getStockItemDispensingUnitId() != null)
+                                        .findFirst();
                                 if (dispensingUnit.isPresent()) {
                                     // remove the rest of other units and leave only the dispensing unit.
                                     entry.getValue().removeIf(p -> !p.getId().equals(dispensingUnit.get().getId()));
                                     // override the UoM name with the dispensing name.
-                                    dispensingUnit.get().setPackagingUomName(dispensingUnit.get().getStockItemDispensingUnitName());
+                                    dispensingUnit.get()
+                                            .setPackagingUomName(dispensingUnit.get().getStockItemDispensingUnitName());
                                 }
                             }
 
-                            for (StockItemInventory stockItemInventory : result.getData().stream().filter(p -> p.getStockItemId().equals(entry.getKey())).collect(Collectors.toList())) {
+                            for (StockItemInventory stockItemInventory : result.getData().stream()
+                                    .filter(p -> p.getStockItemId().equals(entry.getKey()))
+                                    .collect(Collectors.toList())) {
                                 List<StockItemPackagingUOMDTO> uomList = entry.getValue();
-                                
-                                
-                                StockItemPackagingUOMDTO preferredUoM = getPreferredPackagingUoM(stockItemInventory.getQuantity(), uomList,false, uomPriorityIsBigToSmall, null);
-                                stockItemInventory.setQuantity(stockItemInventory.getQuantity().divide(preferredUoM.getFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+
+                                StockItemPackagingUOMDTO preferredUoM = getPreferredPackagingUoM(
+                                        stockItemInventory.getQuantity(), uomList, false, uomPriorityIsBigToSmall,
+                                        null);
+                                stockItemInventory.setQuantity(stockItemInventory.getQuantity()
+                                        .divide(preferredUoM.getFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
                                 stockItemInventory.setQuantityUoM(preferredUoM.getPackagingUomName());
                                 stockItemInventory.setQuantityUoMUuid(preferredUoM.getUuid());
                                 stockItemInventory.setQuantityFactor(preferredUoM.getFactor());
                                 stockItemInventory.setStockItemUuid(preferredUoM.getStockItemUuid());
 
-
                             }
 
-                            if (filter.getTotalBy() != null && filter.getTotalBy() != StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo) {
-                                for (StockItemInventory stockItemInventory : result.getTotals().stream().filter(p -> p.getStockItemId().equals(entry.getKey())).collect(Collectors.toList())) {
+                            if (filter.getTotalBy() != null && filter
+                                    .getTotalBy() != StockItemInventorySearchFilter.InventoryGroupBy.LocationStockItemBatchNo) {
+                                for (StockItemInventory stockItemInventory : result.getTotals().stream()
+                                        .filter(p -> p.getStockItemId().equals(entry.getKey()))
+                                        .collect(Collectors.toList())) {
                                     List<StockItemPackagingUOMDTO> uomList = entry.getValue();
-                                    StockItemPackagingUOMDTO preferredUoM = getPreferredPackagingUoM(stockItemInventory.getQuantity(), uomList, false, uomPriorityIsBigToSmall, null);
-                                    stockItemInventory.setQuantity(stockItemInventory.getQuantity().divide(preferredUoM.getFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
+                                    StockItemPackagingUOMDTO preferredUoM = getPreferredPackagingUoM(
+                                            stockItemInventory.getQuantity(), uomList, false, uomPriorityIsBigToSmall,
+                                            null);
+                                    stockItemInventory.setQuantity(stockItemInventory.getQuantity()
+                                            .divide(preferredUoM.getFactor(), 5, BigDecimal.ROUND_HALF_EVEN));
                                     stockItemInventory.setQuantityUoM(preferredUoM.getPackagingUomName());
                                     stockItemInventory.setQuantityUoMUuid(preferredUoM.getUuid());
                                     stockItemInventory.setQuantityFactor(preferredUoM.getFactor());
@@ -2603,7 +2723,6 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
     public List<StockItem> getStockItems(Collection<Integer> stockItemIds) {
         return dao.getStockItems(stockItemIds);
     }
-
 
     public List<StockItemPackagingUOM> getStockItemPackagingUOMs(
             List<StockItemPackagingUOMSearchFilter.ItemGroupFilter> filters) {
@@ -2669,7 +2788,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
     }
 
     public Result<OrderItemDTO> findOrderItems(OrderItemSearchFilter filter,
-                                               HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
+            HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
         if (recordPrivilegeFilters != null && recordPrivilegeFilters.isEmpty())
             return new Result<>(new ArrayList<>(), 0);
         return dao.findOrderItems(filter, recordPrivilegeFilters);
@@ -2734,7 +2853,8 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
 
         stockRule.setAlertRole(StringUtils.isBlank(stockRuleDTO.getAlertRole()) ? null : stockRuleDTO.getAlertRole());
         stockRule.setMailRole(StringUtils.isBlank(stockRuleDTO.getMailRole()) ? null : stockRuleDTO.getMailRole());
-        stockRule.setEnableDescendants(stockRuleDTO.getEnableDescendants() == null ? false : stockRuleDTO.getEnableDescendants());
+        stockRule.setEnableDescendants(
+                stockRuleDTO.getEnableDescendants() == null ? false : stockRuleDTO.getEnableDescendants());
 
         stockRule = dao.saveStockRule(stockRule);
 
@@ -2756,7 +2876,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
     }
 
     public Result<StockRuleDTO> findStockRules(StockRuleSearchFilter filter,
-                                               HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
+            HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
         if (recordPrivilegeFilters != null && recordPrivilegeFilters.isEmpty())
             return new Result<>(new ArrayList<>(), 0);
         Result<StockRuleDTO> result = dao.findStockRules(filter, recordPrivilegeFilters);
@@ -2784,7 +2904,8 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         if (result.getData().isEmpty()) {
             return;
         }
-        dao.voidStockRules(result.getData().stream().map(p -> p.getUuid()).collect(Collectors.toList()), reason, voidedBy);
+        dao.voidStockRules(result.getData().stream().map(p -> p.getUuid()).collect(Collectors.toList()), reason,
+                voidedBy);
     }
 
     public List<StockRuleNotificationUser> getDueStockRules(Integer lastStockRuleId, int limit) {
@@ -2811,8 +2932,8 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         dao.setStockItemCurrentBalanceWithDescendants(stockRuleCurrentQuantities);
     }
 
-
-    public void setStockItemCurrentBalanceWithoutDescendants(List<StockRuleCurrentQuantity> stockRuleCurrentQuantities) {
+    public void setStockItemCurrentBalanceWithoutDescendants(
+            List<StockRuleCurrentQuantity> stockRuleCurrentQuantities) {
         dao.setStockItemCurrentBalanceWithoutDescendants(stockRuleCurrentQuantities);
     }
 
@@ -2832,12 +2953,14 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         String healthCenterName = GlobalProperties.getHealthCenterName();
         if (StringUtils.isBlank(healthCenterName)) {
             List<Location> locations = Context.getLocationService().getAllLocations();
-            Optional<Pair<String, Long>> topLocation = locations.stream().filter(p -> p.getParentLocation() == null).map(p -> {
-                long count = locations.stream()
-                        .filter(x -> x.getParentLocation() != null && x.getParentLocation().getUuid().equals(p.getUuid()))
-                        .count();
-                return new Pair<String, Long>(p.getName(), count);
-            }).sorted((p1, p2) -> p2.getValue2().compareTo(p1.getValue2()))
+            Optional<Pair<String, Long>> topLocation = locations.stream().filter(p -> p.getParentLocation() == null)
+                    .map(p -> {
+                        long count = locations.stream()
+                                .filter(x -> x.getParentLocation() != null
+                                        && x.getParentLocation().getUuid().equals(p.getUuid()))
+                                .count();
+                        return new Pair<String, Long>(p.getName(), count);
+                    }).sorted((p1, p2) -> p2.getValue2().compareTo(p1.getValue2()))
                     .findFirst();
             if (topLocation.isPresent()) {
                 healthCenterName = topLocation.get().getValue1();
@@ -2858,7 +2981,8 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         stockBatchExpiryJob.execute();
     }
 
-    public List<StockBatchDTO> getExpiringStockBatchesDueForNotification(Integer defaultExpiryNotificationNoticePeriod) {
+    public List<StockBatchDTO> getExpiringStockBatchesDueForNotification(
+            Integer defaultExpiryNotificationNoticePeriod) {
         return dao.getExpiringStockBatchesDueForNotification(defaultExpiryNotificationNoticePeriod);
     }
 
@@ -2899,27 +3023,33 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         }
 
         if (locationAttributes != null && !locationAttributes.isEmpty()) {
-            dao.deleteLocationAttributes(locationAttributes.stream().map(p -> p.getLocationAttributeId()).collect(Collectors.toList()));
+            dao.deleteLocationAttributes(
+                    locationAttributes.stream().map(p -> p.getLocationAttributeId()).collect(Collectors.toList()));
         }
 
         dao.deleteLocation(location.getId());
     }
 
     @SuppressWarnings({ "unchecked" })
-    public void sendStockOperationNotification(String stockOperationUuid, StockOperationAction.Action action, String actionReason, Integer actionByUserId) {
+    public void sendStockOperationNotification(String stockOperationUuid, StockOperationAction.Action action,
+            String actionReason, Integer actionByUserId) {
         StockOperationSearchFilter filter = new StockOperationSearchFilter();
         filter.setStockOperationUuid(stockOperationUuid);
-        Result<StockOperationDTO> result = Context.getService(StockManagementService.class).findStockOperations(filter, null);
+        Result<StockOperationDTO> result = Context.getService(StockManagementService.class).findStockOperations(filter,
+                null);
         StockOperationDTO stockOperationDTO = result.getData().isEmpty() ? null : result.getData().get(0);
-        if (stockOperationDTO == null) return;
+        if (stockOperationDTO == null)
+            return;
 
         String emailToNotity = GlobalProperties.getStockOperationNotificationEmail();
-        if(!org.openmrs.module.stockmanagement.api.utils.StringUtils.isValidEmail(emailToNotity)){
-            emailToNotity=null;
+        if (!org.openmrs.module.stockmanagement.api.utils.StringUtils.isValidEmail(emailToNotity)) {
+            emailToNotity = null;
         }
         String roleToNotify = GlobalProperties.getStockOperationNotificationRole();
         if (StringUtils.isBlank(emailToNotity) && StringUtils.isBlank(roleToNotify)) {
-            log.info(String.format("Stock Operation %1$s Action %2$s not sent. Email and role notification settings not set", stockOperationDTO.getOperationNumber(), action.toString()));
+            log.info(String.format(
+                    "Stock Operation %1$s Action %2$s not sent. Email and role notification settings not set",
+                    stockOperationDTO.getOperationNumber(), action.toString()));
             return;
         }
 
@@ -2927,7 +3057,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         String userName = "System";
         User user = null;
         if (actionByUserId != null) {
-             user = Context.getUserService().getUser(actionByUserId);
+            user = Context.getUserService().getUser(actionByUserId);
 
             if (user == null) {
                 userName = "User ID " + actionByUserId.toString();
@@ -2940,48 +3070,51 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         if (StringUtils.isNotBlank(roleToNotify)) {
             Role role = Context.getUserService().getRole(roleToNotify);
             if (role == null) {
-                log.info(String.format("Stock Operation %1$s Action %2$s not sent. Role not found", stockOperationDTO.getOperationNumber(), action.toString()));
+                log.info(String.format("Stock Operation %1$s Action %2$s not sent. Role not found",
+                        stockOperationDTO.getOperationNumber(), action.toString()));
             } else {
 
                 usersToNotify = Context.getUserService().getUsersByRole(role);
                 if (usersToNotify.isEmpty()) {
-                    log.info(String.format("Stock Operation %1$s Action %2$s not sent. No users with role found", stockOperationDTO.getOperationNumber(), action.toString()));
+                    log.info(String.format("Stock Operation %1$s Action %2$s not sent. No users with role found",
+                            stockOperationDTO.getOperationNumber(), action.toString()));
                 } else {
                     Alert alert = new Alert();
                     alert.setDateCreated(new Date());
                     alert.setCreator(user);
                     alert.setDateToExpire(DateUtils.addDays(new Date(), 7));
-                    alert.setText(String.format(Context.getMessageSourceService().getMessage("stockmanagement.stockoperation.alertmsg"),
+                    alert.setText(String.format(
+                            Context.getMessageSourceService().getMessage("stockmanagement.stockoperation.alertmsg"),
                             stockOperationDTO.getAtLocationName(),
                             stockOperationDTO.getOperationTypeName(),
                             stockOperationDTO.getOperationNumber(),
                             actionName,
-                            userName
-                    ));
+                            userName));
                     usersToNotify.forEach(p -> alert.addRecipient(p));
                     Context.getAlertService().saveAlert(alert);
                 }
             }
         }
         List<String> emailsToNotify = null;
-        if(emailToNotity != null && !emailToNotity.isEmpty()){
-            emailsToNotify = usersToNotify.stream().map(u->{
+        if (emailToNotity != null && !emailToNotity.isEmpty()) {
+            emailsToNotify = usersToNotify.stream().map(u -> {
                 String emailAddress = getUserEmailAddress(u);
-                if(StringUtils.isBlank(emailAddress)){
+                if (StringUtils.isBlank(emailAddress)) {
                     return null;
                 }
                 return emailAddress;
-            }).filter(p-> p != null).collect(Collectors.toList());
+            }).filter(p -> p != null).collect(Collectors.toList());
         }
-        if( emailToNotity == null && (emailsToNotify == null || emailsToNotify.isEmpty())){
-            log.info(String.format("Stock Operation %1$s Action %2$s not sent. No users to notify via email", stockOperationDTO.getOperationNumber(), action.toString()));
+        if (emailToNotity == null && (emailsToNotify == null || emailsToNotify.isEmpty())) {
+            log.info(String.format("Stock Operation %1$s Action %2$s not sent. No users to notify via email",
+                    stockOperationDTO.getOperationNumber(), action.toString()));
             return;
         }
 
-        if(emailsToNotify == null){
-            emailsToNotify=new Vector<>();
+        if (emailsToNotify == null) {
+            emailsToNotify = new Vector<>();
         }
-        if(emailToNotity != null){
+        if (emailToNotity != null) {
             emailsToNotify.add(emailToNotity);
         }
 
@@ -2999,7 +3132,8 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         }
 
         if (!SmtpUtil.hasSmptHostSetup()) {
-            log.info(String.format("Stock Operation %1$s Action %2$s not sent. No smtp settings are not setup", stockOperationDTO.getOperationNumber(), action.toString()));
+            log.info(String.format("Stock Operation %1$s Action %2$s not sent. No smtp settings are not setup",
+                    stockOperationDTO.getOperationNumber(), action.toString()));
             return;
         }
 
@@ -3008,38 +3142,44 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
 
         StringBuilder basicInfo = new StringBuilder();
         MessageSourceService messageSourceService = Context.getMessageSourceService();
-        if(stockOperationDTO.getSourceUuid() != null) {
-            basicInfo.append(String.format("<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
+        if (stockOperationDTO.getSourceUuid() != null) {
+            basicInfo.append(String.format(
+                    "<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
                     messageSourceService.getMessage("stockmanagement.stockoperation.notification.source"),
-                    stockOperationDTO.getSourceName()
-            ));
+                    stockOperationDTO.getSourceName()));
         }
-        if(stockOperationDTO.getDestinationUuid() != null) {
-            basicInfo.append(String.format("<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
+        if (stockOperationDTO.getDestinationUuid() != null) {
+            basicInfo.append(String.format(
+                    "<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
                     messageSourceService.getMessage("stockmanagement.stockoperation.notification.destination"),
-                    stockOperationDTO.getDestinationName()
-                    ));
+                    stockOperationDTO.getDestinationName()));
         }
-        basicInfo.append(String.format("<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
+        basicInfo.append(String.format(
+                "<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
                 messageSourceService.getMessage("stockmanagement.stockoperation.notification.operationdate"),
                 DateUtil.formatDDMMMyyyy(stockOperationDTO.getOperationDate())));
-        basicInfo.append(String.format("<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
+        basicInfo.append(String.format(
+                "<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
                 messageSourceService.getMessage("stockmanagement.stockoperation.notification.responsibleperson"),
-                stockOperationDTO.getResponsiblePersonFamilyName() != null ? String.format("%1$s %2$s", stockOperationDTO.getResponsiblePersonFamilyName(), stockOperationDTO.getResponsiblePersonGivenName()) : stockOperationDTO.getResponsiblePersonOther()));
-        basicInfo.append(String.format("<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
+                stockOperationDTO.getResponsiblePersonFamilyName() != null
+                        ? String.format("%1$s %2$s", stockOperationDTO.getResponsiblePersonFamilyName(),
+                                stockOperationDTO.getResponsiblePersonGivenName())
+                        : stockOperationDTO.getResponsiblePersonOther()));
+        basicInfo.append(String.format(
+                "<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
                 messageSourceService.getMessage("stockmanagement.stockoperation.notification.remarks"),
-                stockOperationDTO.getRemarks() != null ? StringEscapeUtils.escapeHtml(stockOperationDTO.getRemarks()): "&nbsp;"
-                ));
-        if(action == StockOperationAction.Action.RETURN){
-            basicInfo.append(String.format("<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
+                stockOperationDTO.getRemarks() != null ? StringEscapeUtils.escapeHtml(stockOperationDTO.getRemarks())
+                        : "&nbsp;"));
+        if (action == StockOperationAction.Action.RETURN) {
+            basicInfo.append(String.format(
+                    "<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
                     messageSourceService.getMessage("stockmanagement.stockoperation.notification.returnreason"),
-                    actionReason != null ? StringEscapeUtils.escapeHtml(actionReason): "&nbsp;"
-            ));
-        }else if(action == StockOperationAction.Action.REJECT){
-            basicInfo.append(String.format("<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
+                    actionReason != null ? StringEscapeUtils.escapeHtml(actionReason) : "&nbsp;"));
+        } else if (action == StockOperationAction.Action.REJECT) {
+            basicInfo.append(String.format(
+                    "<tr><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'><b>%1$s:</b></td><td style='padding: 0.2rem 0.5rem; font-size: 95%%;'>%2$s</td>",
                     messageSourceService.getMessage("stockmanagement.stockoperation.notification.rejectionreason"),
-                    actionReason != null ? StringEscapeUtils.escapeHtml(actionReason): "&nbsp;"
-            ));
+                    actionReason != null ? StringEscapeUtils.escapeHtml(actionReason) : "&nbsp;"));
         }
 
         String body = template.getTemplate()
@@ -3067,38 +3207,39 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         }
     }
 
-    public BatchJobDTO saveBatchJob(BatchJobDTO batchJobDTO){
+    public BatchJobDTO saveBatchJob(BatchJobDTO batchJobDTO) {
         Location locationScope = null;
-        if(!StringUtils.isBlank(batchJobDTO.getLocationScopeUuid())) {
+        if (!StringUtils.isBlank(batchJobDTO.getLocationScopeUuid())) {
             locationScope = Context.getLocationService().getLocationByUuid(batchJobDTO.getLocationScopeUuid());
-            if(locationScope == null){
-                invalidRequest(Context.getMessageSourceService().getMessage("stockmanagement.batchjob.fieldvaluenotexist"), "report");
+            if (locationScope == null) {
+                invalidRequest(
+                        Context.getMessageSourceService().getMessage("stockmanagement.batchjob.fieldvaluenotexist"),
+                        "report");
             }
         }
 
-        BatchJobSearchFilter batchJobSearchFilter=new BatchJobSearchFilter();
+        BatchJobSearchFilter batchJobSearchFilter = new BatchJobSearchFilter();
         batchJobSearchFilter.setBatchJobType(batchJobDTO.getBatchJobType());
         batchJobSearchFilter.setParameters(batchJobDTO.getParameters());
         batchJobSearchFilter.setPrivilegeScope(batchJobDTO.getPrivilegeScope());
-        if(locationScope != null) {
+        if (locationScope != null) {
             batchJobSearchFilter.setLocationScopeIds(Arrays.asList(locationScope.getId()));
         }
         batchJobSearchFilter.setBatchJobStatus(Arrays.asList(BatchJobStatus.Pending, BatchJobStatus.Running));
         Result<BatchJobDTO> pendingSimilarJobs = findBatchJobs(batchJobSearchFilter, null);
         BatchJob batchJob = null;
-        if(!pendingSimilarJobs.getData().isEmpty()){
+        if (!pendingSimilarJobs.getData().isEmpty()) {
             batchJob = dao.getBatchJobById(pendingSimilarJobs.getData().get(0).getId());
-            if(batchJob.getBatchJobOwners() == null){
+            if (batchJob.getBatchJobOwners() == null) {
                 batchJob.setBatchJobOwners(new HashSet<>());
             }
             Integer currentUserId = Context.getAuthenticatedUser().getId();
-            if(!batchJob.getBatchJobOwners().stream().anyMatch(p->p.getOwner().getId().equals(currentUserId))){
+            if (!batchJob.getBatchJobOwners().stream().anyMatch(p -> p.getOwner().getId().equals(currentUserId))) {
                 BatchJobOwner batchJobOwner = new BatchJobOwner();
                 batchJobOwner.setOwner(Context.getAuthenticatedUser());
                 batchJob.addBatchJobOwner(batchJobOwner);
             }
-        }
-        else {
+        } else {
 
             batchJob = new BatchJob();
             batchJob.setCreator(Context.getAuthenticatedUser());
@@ -3128,7 +3269,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         return jobs.getData().isEmpty() ? null : jobs.getData().get(0);
     }
 
-    public Result<BatchJobDTO> findBatchJobs(BatchJobSearchFilter filter){
+    public Result<BatchJobDTO> findBatchJobs(BatchJobSearchFilter filter) {
         HashSet<RecordPrivilegeFilter> recordPrivilegeFilters = getRecordPrivilegeFilters(
                 Context.getAuthenticatedUser(), null, null, Privileges.APP_STOCKMANAGEMENT_REPORTS);
         if (recordPrivilegeFilters == null || recordPrivilegeFilters.isEmpty())
@@ -3136,19 +3277,22 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         return findBatchJobs(filter, recordPrivilegeFilters);
     }
 
-    public Result<BatchJobDTO> findBatchJobs(BatchJobSearchFilter batchJobSearchFilter,HashSet<RecordPrivilegeFilter> recordPrivilegeFilters){
+    public Result<BatchJobDTO> findBatchJobs(BatchJobSearchFilter batchJobSearchFilter,
+            HashSet<RecordPrivilegeFilter> recordPrivilegeFilters) {
         return dao.findBatchJobs(batchJobSearchFilter, recordPrivilegeFilters);
     }
 
-    public void failBatchJob(String batchJobUuid, String reason){
+    public void failBatchJob(String batchJobUuid, String reason) {
         BatchJob batchJob = dao.getBatchJobByUuid(batchJobUuid);
-        if(batchJob == null) return;
+        if (batchJob == null)
+            return;
 
-        if(!batchJob.getStatus().equals(BatchJobStatus.Running) && !batchJob.getStatus().equals(BatchJobStatus.Pending)){
+        if (!batchJob.getStatus().equals(BatchJobStatus.Running)
+                && !batchJob.getStatus().equals(BatchJobStatus.Pending)) {
             invalidRequest("stockmanagement.batchjob.notcancellable");
         }
-        if(reason != null && reason.length() > 2500){
-            reason = reason.substring(0,2500-1);
+        if (reason != null && reason.length() > 2500) {
+            reason = reason.substring(0, 2500 - 1);
         }
         batchJob.setExitMessage(reason);
         batchJob.setStatus(BatchJobStatus.Failed);
@@ -3157,12 +3301,13 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         dao.saveBatchJob(batchJob);
     }
 
-
-    public void cancelBatchJob(String batchJobUuid, String reason){
+    public void cancelBatchJob(String batchJobUuid, String reason) {
         BatchJob batchJob = dao.getBatchJobByUuid(batchJobUuid);
-        if(batchJob == null) return;
+        if (batchJob == null)
+            return;
 
-        if(!batchJob.getStatus().equals(BatchJobStatus.Running) && !batchJob.getStatus().equals(BatchJobStatus.Pending)){
+        if (!batchJob.getStatus().equals(BatchJobStatus.Running)
+                && !batchJob.getStatus().equals(BatchJobStatus.Pending)) {
             invalidRequest("stockmanagement.batchjob.notcancellable");
         }
 
@@ -3177,31 +3322,32 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         AsyncTasksBatchJob.stopBatchJob(batchJob);
     }
 
-    public List<Report> getReports(){
+    public List<Report> getReports() {
         return Report.getAllReports();
     }
 
-    public BatchJob getNextActiveBatchJob(){
+    public BatchJob getNextActiveBatchJob() {
         return dao.getNextActiveBatchJob();
     }
 
-    public BatchJob getBatchJobByUuid(String batchJobUuid){
+    public BatchJob getBatchJobByUuid(String batchJobUuid) {
         return dao.getBatchJobByUuid(batchJobUuid);
     }
 
-    public void saveBatchJob(BatchJob batchJob){
+    public void saveBatchJob(BatchJob batchJob) {
         dao.saveBatchJob(batchJob);
     }
 
-    public Result<StockOperationLineItem> findStockOperationLineItems(StockOperationLineItemFilter filter){
+    public Result<StockOperationLineItem> findStockOperationLineItems(StockOperationLineItemFilter filter) {
         return dao.findStockOperationLineItems(filter);
     }
 
-    public void updateBatchJobRunning(String batchJobUuid){
+    public void updateBatchJobRunning(String batchJobUuid) {
         BatchJob batchJob = dao.getBatchJobByUuid(batchJobUuid);
-        if(batchJob == null) return;
+        if (batchJob == null)
+            return;
         batchJob.setStatus(BatchJobStatus.Running);
-        if(batchJob.getStartTime() == null) {
+        if (batchJob.getStartTime() == null) {
             batchJob.setStartTime(new Date());
         }
         batchJob.setDateChanged(new Date());
@@ -3209,11 +3355,12 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         dao.saveBatchJob(batchJob);
     }
 
-    public void expireBatchJob(String batchJobUuid, String reason){
+    public void expireBatchJob(String batchJobUuid, String reason) {
         BatchJob batchJob = dao.getBatchJobByUuid(batchJobUuid);
-        if(batchJob == null) return;
+        if (batchJob == null)
+            return;
         batchJob.setStatus(BatchJobStatus.Expired);
-        if(batchJob.getStartTime() != null){
+        if (batchJob.getStartTime() != null) {
             batchJob.setEndTime(new Date());
         }
         batchJob.setExitMessage(reason);
@@ -3222,122 +3369,139 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         dao.saveBatchJob(batchJob);
     }
 
-    public void updateBatchJobExecutionState(String batchJobUuid, String  executionState){
+    public void updateBatchJobExecutionState(String batchJobUuid, String executionState) {
         BatchJob batchJob = dao.getBatchJobByUuid(batchJobUuid);
-        if(batchJob == null) return;
+        if (batchJob == null)
+            return;
         batchJob.setExecutionState(executionState);
         batchJob.setDateChanged(new Date());
         batchJob.setChangedBy(Context.getAuthenticatedUser());
         dao.saveBatchJob(batchJob);
     }
 
-
-    public String getUserEmailAddress(User user){
+    public String getUserEmailAddress(User user) {
         String emailAddress = dao.getUserEmail(user.getId());
         if (!org.openmrs.module.stockmanagement.api.utils.StringUtils.isValidEmail(emailAddress)) {
             emailAddress = user.getUserProperty(OpenmrsConstants.USER_PROPERTY_NOTIFICATION_ADDRESS);
             if (!org.openmrs.module.stockmanagement.api.utils.StringUtils.isValidEmail(emailAddress)) {
                 emailAddress = user.getUsername();
                 if (!org.openmrs.module.stockmanagement.api.utils.StringUtils.isValidEmail(emailAddress)) {
-                    return  null;
+                    return null;
                 }
             }
         }
         return emailAddress;
     }
 
-    public Result<StockBatchLineItem> getExpiringStockBatchList(StockExpiryFilter filter){
+    public Result<StockBatchLineItem> getExpiringStockBatchList(StockExpiryFilter filter) {
         return dao.getExpiringStockBatchList(filter);
     }
 
-    public <T extends StockItemInventory> void getStockInventory(StockItemInventorySearchFilter filter, HashSet<RecordPrivilegeFilter> recordPrivilegeFilters, Function<T, Boolean> consumer, Class<T> resultClass){
+    public <T extends StockItemInventory> void getStockInventory(StockItemInventorySearchFilter filter,
+            HashSet<RecordPrivilegeFilter> recordPrivilegeFilters, Function<T, Boolean> consumer,
+            Class<T> resultClass) {
         dao.getStockInventory(filter, recordPrivilegeFilters, consumer, resultClass);
     }
 
-    public void setStockItemInformation(List<StockItemInventory> reportStockItemInventories){
+    public void setStockItemInformation(List<StockItemInventory> reportStockItemInventories) {
         dao.setStockItemInformation(reportStockItemInventories);
     }
 
-    public Result<DispensingLineItem> findDispensingLineItems(DispensingLineFilter filter){
+    public Result<DispensingLineItem> findDispensingLineItems(DispensingLineFilter filter) {
         return dao.findDispensingLineItems(filter);
     }
 
-    public Result<PrescriptionLineItem> findPrescriptionLineItems(PrescriptionLineFilter filter){
+    public Result<PrescriptionLineItem> findPrescriptionLineItems(PrescriptionLineFilter filter) {
         return dao.findPrescriptionLineItems(filter);
     }
 
-    public Result<StockItemInventory> getLeastMovingStockInventory(StockItemInventorySearchFilter filter){
+    public Result<StockItemInventory> getLeastMovingStockInventory(StockItemInventorySearchFilter filter) {
         return dao.getLeastMovingStockInventory(filter);
     }
 
-    public Result<StockItemInventory> getMostMovingStockInventory(StockItemInventorySearchFilter filter){
+    public Result<StockItemInventory> getMostMovingStockInventory(StockItemInventorySearchFilter filter) {
         return dao.getMostMovingStockInventory(filter);
     }
 
-    public void getStockInventoryForecastData(StockItemInventorySearchFilter filter, Function<Object[], Boolean> consumer){
+    public void getStockInventoryForecastData(StockItemInventorySearchFilter filter,
+            Function<Object[], Boolean> consumer) {
         dao.getStockInventoryForecastData(filter, consumer);
     }
 
-    public void getStockInventoryExpiryForecastData(StockItemInventorySearchFilter filter, Function<Object[], Boolean> consumer){
+    public void getStockInventoryExpiryForecastData(StockItemInventorySearchFilter filter,
+            Function<Object[], Boolean> consumer) {
         dao.getStockInventoryExpiryForecastData(filter, consumer);
     }
 
-    public List<BatchJob> getExpiredBatchJobs(){
+    public List<BatchJob> getExpiredBatchJobs() {
         return dao.getExpiredBatchJobs();
     }
 
-    public void deleteBatchJob(BatchJob batchJob){
+    public void deleteBatchJob(BatchJob batchJob) {
         dao.deleteBatchJob(batchJob);
     }
 
-    private StockItemPackagingUOMDTO getPreferredPackagingUoM(BigDecimal value, List<StockItemPackagingUOMDTO> uoms, boolean isDispensing, boolean uomPriorityIsBigToSmall, Integer preferredStockItemPackagingUOMId){
-        if(isDispensing || !uomPriorityIsBigToSmall) {
-            // When dispensing or the priority is small to big, we order the units from small pack size to biggest
-            uoms.sort(Comparator.comparing(StockItemPackagingUOMDTO::getIsDefaultStockOperationsUoM).reversed().thenComparing(StockItemPackagingUOMDTO::getFactor));
-        }else{
-            // When not dispensing or the priority is big to small, we order the units from small pack size to biggest
-            uoms.sort(Comparator.comparing(StockItemPackagingUOMDTO::getIsDefaultStockOperationsUoM).reversed().thenComparing(Comparator.comparing(StockItemPackagingUOMDTO::getFactor).reversed()));
+    private StockItemPackagingUOMDTO getPreferredPackagingUoM(BigDecimal value, List<StockItemPackagingUOMDTO> uoms,
+            boolean isDispensing, boolean uomPriorityIsBigToSmall, Integer preferredStockItemPackagingUOMId) {
+        if (isDispensing || !uomPriorityIsBigToSmall) {
+            // When dispensing or the priority is small to big, we order the units from
+            // small pack size to biggest
+            uoms.sort(Comparator.comparing(StockItemPackagingUOMDTO::getIsDefaultStockOperationsUoM).reversed()
+                    .thenComparing(StockItemPackagingUOMDTO::getFactor));
+        } else {
+            // When not dispensing or the priority is big to small, we order the units from
+            // small pack size to biggest
+            uoms.sort(Comparator.comparing(StockItemPackagingUOMDTO::getIsDefaultStockOperationsUoM).reversed()
+                    .thenComparing(Comparator.comparing(StockItemPackagingUOMDTO::getFactor).reversed()));
         }
         StockItemPackagingUOMDTO foundUoM = null;
         boolean checkedPreferred = false;
         boolean checkPreferred = preferredStockItemPackagingUOMId != null;
         boolean thisIsThePreferred = false;
-        for(StockItemPackagingUOMDTO uom : uoms){
-            if(checkPreferred){
+        for (StockItemPackagingUOMDTO uom : uoms) {
+            if (checkPreferred) {
                 thisIsThePreferred = preferredStockItemPackagingUOMId.equals(uom.getId());
             }
-            if(value.divide(uom.getFactor(), 5, BigDecimal.ROUND_HALF_EVEN).abs().compareTo(BigDecimal.valueOf(1)) >= 0) {
+            if (value.divide(uom.getFactor(), 5, BigDecimal.ROUND_HALF_EVEN).abs()
+                    .compareTo(BigDecimal.valueOf(1)) >= 0) {
                 // If we have no preferred, we return the first uom
-                if(!checkPreferred) return uom;
+                if (!checkPreferred)
+                    return uom;
                 // If this is the preferred, return it immediately
-                if(thisIsThePreferred) return uom;
-                // If we already checked the preferred and it did not quality, return the first uom that was found or the current one
-                if(checkedPreferred) return foundUoM != null ? foundUoM : uom;
-                if(foundUoM == null){
+                if (thisIsThePreferred)
+                    return uom;
+                // If we already checked the preferred and it did not quality, return the first
+                // uom that was found or the current one
+                if (checkedPreferred)
+                    return foundUoM != null ? foundUoM : uom;
+                if (foundUoM == null) {
                     foundUoM = uom;
                 }
             }
-            if(thisIsThePreferred){
-                checkedPreferred=true;
+            if (thisIsThePreferred) {
+                checkedPreferred = true;
             }
         }
         return (checkedPreferred && foundUoM != null) ? foundUoM : (uoms.isEmpty() ? null : uoms.get(0));
     }
 
-    public Map<Integer, Boolean> checkStockBatchHasTransactionsAfterOperation(Integer stockOperationId, List<Integer> stockBatchIds){
+    public Map<Integer, Boolean> checkStockBatchHasTransactionsAfterOperation(Integer stockOperationId,
+            List<Integer> stockBatchIds) {
         return dao.checkStockBatchHasTransactionsAfterOperation(stockOperationId, stockBatchIds);
     }
 
-    public StockOperationBatchNumbersDTO saveStockOperationBatchNumbers(StockOperationBatchNumbersDTO stockOperationBatchNumbers){
-        if(stockOperationBatchNumbers == null) {
+    public StockOperationBatchNumbersDTO saveStockOperationBatchNumbers(
+            StockOperationBatchNumbersDTO stockOperationBatchNumbers) {
+        if (stockOperationBatchNumbers == null) {
             invalidRequest("stockmanagement.stockoperation.updatebatchnumbersnotset");
         }
 
-        if(StringUtils.isBlank(stockOperationBatchNumbers.getUuid())){
+        if (StringUtils.isBlank(stockOperationBatchNumbers.getUuid())) {
             invalidRequest("stockmanagement.stockoperation.updatebatchnumbersuuidnotset");
         }
 
-        if(stockOperationBatchNumbers.getBatchNumbers() == null || stockOperationBatchNumbers.getBatchNumbers().isEmpty()){
+        if (stockOperationBatchNumbers.getBatchNumbers() == null
+                || stockOperationBatchNumbers.getBatchNumbers().isEmpty()) {
             invalidRequest("stockmanagement.stockoperation.updatebatchnumbersnosnotset");
         }
         synchronized (STOCK_OPERATION_PROCESSING_LOCK) {
@@ -3362,21 +3526,23 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
 
             HashSet<PrivilegeScope> privilegeScopes = getPrivilegeScopes(Context.getAuthenticatedUser(),
                     stockOperation.getAtLocation(), stockOperationType,
-                    Arrays.asList(Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_MUTATE)
-            );
+                    Arrays.asList(Privileges.TASK_STOCKMANAGEMENT_STOCKOPERATIONS_MUTATE));
 
             if (privilegeScopes.isEmpty()) {
                 invalidRequest("stockmanagement.stockoperation.updatebatchnumbersaccessdenied");
             }
 
             Set<StockOperationItem> stockOperationItems = stockOperation.getStockOperationItems();
-            Map<Integer, Boolean> stockBatchHasTransactions = checkStockBatchHasTransactionsAfterOperation(stockOperationDTO.getId(), stockOperationItems.stream().filter(p -> p.getStockBatch() != null).map(p -> p.getStockBatch().getId()).distinct().collect(Collectors.toList()));
+            Map<Integer, Boolean> stockBatchHasTransactions = checkStockBatchHasTransactionsAfterOperation(
+                    stockOperationDTO.getId(), stockOperationItems.stream().filter(p -> p.getStockBatch() != null)
+                            .map(p -> p.getStockBatch().getId()).distinct().collect(Collectors.toList()));
             HashMap<String, StockBatch> stockBatchMapping = new HashMap<>();
             List<StockBatch> newStockBatches = new ArrayList<>();
             Integer index = 0;
 
             List<StockOperationItem> stockOperationItemsToUpdate = new ArrayList<>();
-            for (StockOperationBatchNumbersDTO.StockOperationItemBatchNumber batchNumber : stockOperationBatchNumbers.getBatchNumbers()) {
+            for (StockOperationBatchNumbersDTO.StockOperationItemBatchNumber batchNumber : stockOperationBatchNumbers
+                    .getBatchNumbers()) {
                 index++;
                 if (StringUtils.isBlank(batchNumber.getBatchNo())) {
                     invalidRequestWithKey("stockmanagement.stockoperation.batchnorequired", index.toString());
@@ -3387,12 +3553,15 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                 }
 
                 if (StringUtils.isBlank(batchNumber.getUuid())) {
-                    invalidRequestWithKey("stockmanagement.stockoperation.updatebatchnumbersitemrequired", index.toString());
+                    invalidRequestWithKey("stockmanagement.stockoperation.updatebatchnumbersitemrequired",
+                            index.toString());
                 }
 
-                Optional<StockOperationItem> existingItemDto = stockOperationItems.stream().filter(p -> p.getUuid().equals(batchNumber.getUuid())).findFirst();
+                Optional<StockOperationItem> existingItemDto = stockOperationItems.stream()
+                        .filter(p -> p.getUuid().equals(batchNumber.getUuid())).findFirst();
                 if (!existingItemDto.isPresent()) {
-                    invalidRequestWithKey("stockmanagement.stockoperation.updatebatchnumbersvaliditemrequired", index.toString());
+                    invalidRequestWithKey("stockmanagement.stockoperation.updatebatchnumbersvaliditemrequired",
+                            index.toString());
                 }
 
                 if (existingItemDto.get().getStockItem().getHasExpiration()) {
@@ -3402,14 +3571,17 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                 }
 
                 if (stockBatchHasTransactions.containsKey(existingItemDto.get().getStockBatch().getId())) {
-                    invalidRequestWithKey("stockmanagement.stockoperation.updatebatchnumbersalreadyinuse", existingItemDto.get().getStockBatch().getBatchNo());
+                    invalidRequestWithKey("stockmanagement.stockoperation.updatebatchnumbersalreadyinuse",
+                            existingItemDto.get().getStockBatch().getBatchNo());
                 }
 
                 StockItem stockItem = existingItemDto.get().getStockItem();
-                StockBatch stockBatch = findStockBatch(stockItem, batchNumber.getBatchNo(), batchNumber.getExpiration());
+                StockBatch stockBatch = findStockBatch(stockItem, batchNumber.getBatchNo(),
+                        batchNumber.getExpiration());
                 if (stockBatch == null) {
                     if (stockBatchHasTransactions.containsKey(existingItemDto.get().getStockBatch().getId())) {
-                        invalidRequestWithKey("stockmanagement.stockoperation.updatebatchnumbersalreadyinuse", existingItemDto.get().getStockBatch().getBatchNo());
+                        invalidRequestWithKey("stockmanagement.stockoperation.updatebatchnumbersalreadyinuse",
+                                existingItemDto.get().getStockBatch().getBatchNo());
                     }
                     Optional<StockBatch> newlyAddedStockBatch = newStockBatches
                             .stream().filter(p -> p.getStockItem().getId().equals(stockItem.getId()) &&
@@ -3434,9 +3606,11 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                     }
                     stockOperationItemsToUpdate.add(existingItemDto.get());
                 } else {
-                    if (existingItemDto.get().getStockBatch() == null || !stockBatch.getId().equals(existingItemDto.get().getStockBatch().getId())) {
+                    if (existingItemDto.get().getStockBatch() == null
+                            || !stockBatch.getId().equals(existingItemDto.get().getStockBatch().getId())) {
                         if (stockBatchHasTransactions.containsKey(existingItemDto.get().getStockBatch().getId())) {
-                            invalidRequestWithKey("stockmanagement.stockoperation.updatebatchnumbersalreadyinuse", existingItemDto.get().getStockBatch().getBatchNo());
+                            invalidRequestWithKey("stockmanagement.stockoperation.updatebatchnumbersalreadyinuse",
+                                    existingItemDto.get().getStockBatch().getBatchNo());
                         }
                         stockBatchMapping.putIfAbsent(existingItemDto.get().getUuid(), stockBatch);
                         stockOperationItemsToUpdate.add(existingItemDto.get());
@@ -3476,8 +3650,8 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
 
     @Override
     public StockItem getStockItemByReference(StockSource stockSource, String code) {
-       StockItemReference stockItemReference = dao.getStockItemByReference(stockSource,code);
-        if(stockItemReference!=null) {
+        StockItemReference stockItemReference = dao.getStockItemByReference(stockSource, code);
+        if (stockItemReference != null) {
             return dao.getStockItemByReference(stockSource, code).getStockItem();
         }
 
@@ -3502,10 +3676,10 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
     @Override
     public List<StockItemReference> getStockItemReferenceByStockItem(String uuid) {
 
-       StockItem stockItem= getStockItemByUuid(uuid);
-        if(stockItem!=null) {
+        StockItem stockItem = getStockItemByUuid(uuid);
+        if (stockItem != null) {
             return dao.getStockItemReferenceByStockItem(stockItem);
-        }else {
+        } else {
             return null;
         }
     }

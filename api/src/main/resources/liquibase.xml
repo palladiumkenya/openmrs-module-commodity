@@ -4804,4 +4804,232 @@ CREATE TRIGGER stockmgmt_location_after_delete
       </column>
     </addColumn>
 </changeSet>
+
+<changeSet id="stockmanagement-20251027-1700" author="makombe">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">SELECT COUNT(*) FROM location_tag WHERE name = 'Sub Store'</sqlCheck>
+    </preConditions>
+    <comment>Creating the Sub Store location tag</comment>
+    <insert tableName="location_tag">
+      <column name="name">Sub Store</column>
+      <column name="description">A location which is the sub facility stock holding area.</column>
+      <column name="creator">1</column>
+      <column name="date_created">2025-10-27</column>
+      <column name="uuid">b973cb5a-2d9e-4a1e-ad7f-215f49f9577e</column>
+    </insert>
+  </changeSet>
+
+  <changeSet id="stockmanagement-1758855877841-202510271706" author="jecihjoy">
+    <preConditions onFail="MARK_RAN">
+      <dbms type="mysql" />
+    </preConditions>
+    <comment>
+      Creating trigger stockmgmt_location_after_insert on location table
+    </comment>
+    <sql splitStatements="true" endDelimiter="\$\$"><![CDATA[
+      DROP TRIGGER IF EXISTS `stockmgmt_location_after_insert`;
+      $$
+      CREATE TRIGGER `stockmgmt_location_after_insert` AFTER INSERT ON `location_tag_map`
+        FOR EACH ROW
+         If Not Exists (select party_id from stockmgmt_party where location_id = NEW.location_id) THEN
+          BEGIN
+            IF NEW.location_tag_id IN ( select location_tag_id from location_tag where uuid in ('b973cb5a-2d9e-4a1e-ad7f-215f49f9577e')) THEN
+              INSERT INTO stockmgmt_location_tree (parent_location_id, child_location_id, depth, uuid)
+              VALUES (NEW.location_id, NEW.location_id, 0, uuid());
+
+              INSERT INTO stockmgmt_party(location_id, creator, date_created, uuid)
+                VALUES(NEW.location_id, 1, CURDATE(), uuid());
+            END IF;
+            END;
+          END IF;
+      $$
+            ]]></sql>
+    <rollback>
+      DROP TRIGGER IF EXISTS `stockmgmt_location_after_insert`;
+    </rollback>
+  </changeSet>
+
+  <changeSet id="stockmanagement-20251027-2200" author="dev">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">
+        SELECT COUNT(*)
+        FROM stockmgmt_operation_type_location_scope sotls
+        WHERE sotls.stock_operation_type_id = (SELECT sot.stock_operation_type_id FROM stockmgmt_stock_operation_type sot WHERE uuid='11111111-1111-1111-1111-111111111111') AND
+        location_tag='Sub Store'
+      </sqlCheck>
+    </preConditions>
+    <comment>Limiting adjustment stock from the Sub Store</comment>
+    <sql>
+      INSERT INTO stockmgmt_operation_type_location_scope(stock_operation_type_id,location_tag,is_source,is_destination,creator,date_created,uuid)
+      SELECT sot.stock_operation_type_id,'Sub Store',1, 0,1,now(), 'b973cb5a-2d9e-4a1e-ad7f-215f49f9577e'
+      FROM stockmgmt_stock_operation_type sot
+      WHERE uuid='11111111-1111-1111-1111-111111111111'
+    </sql>
+  </changeSet>
+
+  <changeSet id="stockmanagement-20251027-2215" author="dev">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">
+        SELECT COUNT(*)
+        FROM stockmgmt_operation_type_location_scope sotls
+        WHERE sotls.stock_operation_type_id = (SELECT sot.stock_operation_type_id FROM stockmgmt_stock_operation_type sot WHERE uuid='66666666-6666-6666-6666-666666666666') AND
+        location_tag='Sub Store' AND is_source=1
+      </sqlCheck>
+    </preConditions>
+    <comment>Allow the issuing of stock from sub store also</comment>
+    <sql>
+      INSERT INTO stockmgmt_operation_type_location_scope(stock_operation_type_id,location_tag,is_source,is_destination,creator,date_created,uuid)
+      SELECT sot.stock_operation_type_id,'Sub Store',1, 0,1,now(), '883b6f71-f1db-43da-a096-7ec12a68f000'
+      FROM stockmgmt_stock_operation_type sot
+      WHERE uuid='66666666-6666-6666-6666-666666666666'
+    </sql>
+  </changeSet>
+
+  <changeSet id="stockmanagement-20252810-1100" author="makombe">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">
+        SELECT COUNT(*)
+        FROM stockmgmt_operation_type_location_scope sotls
+        WHERE sotls.stock_operation_type_id = (SELECT sot.stock_operation_type_id FROM stockmgmt_stock_operation_type sot WHERE uuid='66666666-6666-6666-6666-666666666666') AND
+        location_tag='Sub Store'  AND is_destination=1
+      </sqlCheck>
+    </preConditions>
+    <comment>Allow the destination of issued stock to Sub Store</comment>
+    <sql>
+      INSERT INTO stockmgmt_operation_type_location_scope(stock_operation_type_id,location_tag,is_source,is_destination,creator,date_created,uuid)
+      SELECT sot.stock_operation_type_id,'Sub Store',0, 1,1,now(), '015012e0-d956-4e04-997d-382a9a0d3a80'
+      FROM stockmgmt_stock_operation_type sot
+      WHERE uuid='66666666-6666-6666-6666-666666666666'
+    </sql>
+  </changeSet>
+
+  <changeSet id="stockmanagement-20251027-2217" author="makombe">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">
+        SELECT COUNT(*)
+        FROM stockmgmt_operation_type_location_scope sotls
+        WHERE sotls.stock_operation_type_id = (SELECT sot.stock_operation_type_id FROM stockmgmt_stock_operation_type sot WHERE uuid='77777777-7777-7777-7777-777777777777') AND
+        location_tag='Sub Store'  AND is_source=1
+      </sqlCheck>
+    </preConditions>
+    <comment>Allow initiating of stock requisition from Sub Store</comment>
+    <sql>
+      INSERT INTO stockmgmt_operation_type_location_scope(stock_operation_type_id,location_tag,is_source,is_destination,creator,date_created,uuid)
+      SELECT sot.stock_operation_type_id,'Sub Store',1, 0,1,now(), 'c9691d16-3c42-4085-9af4-16b09a4cca89'
+      FROM stockmgmt_stock_operation_type sot
+      WHERE uuid='77777777-7777-7777-7777-777777777777'
+    </sql>
+  </changeSet>
+
+  <changeSet id="stockmanagement-20251027-2220" author="makombe">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">
+        SELECT COUNT(*)
+        FROM stockmgmt_operation_type_location_scope sotls
+        WHERE sotls.stock_operation_type_id = (SELECT sot.stock_operation_type_id FROM stockmgmt_stock_operation_type sot WHERE uuid='99999999-9999-9999-9999-999999999999') AND
+        location_tag='Sub Store'
+      </sqlCheck>
+    </preConditions>
+    <comment>Allow opening stock from the Sub Store</comment>
+    <sql>
+      INSERT INTO stockmgmt_operation_type_location_scope(stock_operation_type_id,location_tag,is_source,is_destination,creator,date_created,uuid)
+      SELECT sot.stock_operation_type_id,'Sub Store',1, 0,1,now(), '80002f74-37eb-4db8-8a8c-1e92c0f0e80c'
+      FROM stockmgmt_stock_operation_type sot
+      WHERE uuid='99999999-9999-9999-9999-999999999999'
+    </sql>
+  </changeSet>
+
+  <changeSet id="stockmanagement-20251028-1140" author="makombe">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">
+        SELECT COUNT(*)
+        FROM stockmgmt_operation_type_location_scope sotls
+        WHERE sotls.stock_operation_type_id = (SELECT sot.stock_operation_type_id FROM stockmgmt_stock_operation_type sot WHERE uuid='77777777-7777-7777-7777-777777777777') AND
+        location_tag='Sub Store' AND is_destination=1
+      </sqlCheck>
+    </preConditions>
+    <comment>Allow the destination of requisition of stock to a sub store</comment>
+    <sql>
+      INSERT INTO stockmgmt_operation_type_location_scope(stock_operation_type_id,location_tag,is_source,is_destination,creator,date_created,uuid)
+      SELECT sot.stock_operation_type_id,'Sub Store',0, 1,1,now(), '488f4705-a8a4-4e62-ad4f-8ca34763c50b'
+      FROM stockmgmt_stock_operation_type sot
+      WHERE uuid='77777777-7777-7777-7777-777777777777'
+    </sql>
+  </changeSet>
+
+  <changeSet id="stockmanagement-20251028-1301" author="makombe">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">
+        SELECT COUNT(*)
+        FROM stockmgmt_operation_type_location_scope sotls
+        WHERE sotls.stock_operation_type_id = (SELECT sot.stock_operation_type_id FROM stockmgmt_stock_operation_type sot WHERE uuid='55555555-5555-5555-5555-555555555555') AND
+        location_tag='Sub Store'  AND is_source=1
+      </sqlCheck>
+    </preConditions>
+    <comment>Allow initiating of return of stock from Sub Store</comment>
+    <sql>
+      INSERT INTO stockmgmt_operation_type_location_scope(stock_operation_type_id,location_tag,is_source,is_destination,creator,date_created,uuid)
+      SELECT sot.stock_operation_type_id,'Sub Store',1, 0,1,now(), 'a87a188c-37ef-43a6-a4b8-b287d345208b'
+      FROM stockmgmt_stock_operation_type sot
+      WHERE uuid='55555555-5555-5555-5555-555555555555'
+    </sql>
+  </changeSet>
+
+  <changeSet id="stockmanagement-20251028-1320" author="makombe">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">
+        SELECT COUNT(*)
+        FROM stockmgmt_operation_type_location_scope sotls
+        WHERE sotls.stock_operation_type_id = (SELECT sot.stock_operation_type_id FROM stockmgmt_stock_operation_type sot WHERE uuid='55555555-5555-5555-5555-555555555555') AND
+        location_tag='Sub Store' AND is_destination=1
+      </sqlCheck>
+    </preConditions>
+    <comment>Allow the destination of returned stock to sub store</comment>
+    <sql>
+      INSERT INTO stockmgmt_operation_type_location_scope(stock_operation_type_id,location_tag,is_source,is_destination,creator,date_created,uuid)
+      SELECT sot.stock_operation_type_id,'Sub Store',0, 1,1,now(), '14f0bf55-d192-4384-81bc-7f24a3f5c7b7'
+      FROM stockmgmt_stock_operation_type sot
+      WHERE uuid='55555555-5555-5555-5555-555555555555'
+    </sql>
+  </changeSet>
+
+   <changeSet id="stockmanagement-20251028-1321" author="makombe">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">
+        SELECT COUNT(*)
+        FROM stockmgmt_operation_type_location_scope sotls
+        WHERE sotls.stock_operation_type_id = (SELECT sot.stock_operation_type_id FROM stockmgmt_stock_operation_type sot WHERE uuid='11111111-1111-1111-1111-111111111111') AND
+        location_tag='Sub Store'
+      </sqlCheck>
+    </preConditions>
+    <comment>Limiting adjustment stock from the Sub Store</comment>
+    <sql>
+      INSERT INTO stockmgmt_operation_type_location_scope(stock_operation_type_id,location_tag,is_source,is_destination,creator,date_created,uuid)
+      SELECT sot.stock_operation_type_id,'Sub Store',1, 0,1,now(), '63e41a9f-400e-43a1-ac35-f3ba15e62a08'
+      FROM stockmgmt_stock_operation_type sot
+      WHERE uuid='11111111-1111-1111-1111-111111111111'
+    </sql>
+  </changeSet>
+
+  <changeSet id="stockmanagement-20251028-1322" author="makombe">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">
+        SELECT COUNT(*)
+        FROM stockmgmt_operation_type_location_scope sotls
+        WHERE sotls.stock_operation_type_id = (SELECT sot.stock_operation_type_id FROM stockmgmt_stock_operation_type sot WHERE uuid='88888888-8888-8888-8888-888888888888') AND
+        location_tag='Sub Store'
+      </sqlCheck>
+    </preConditions>
+    <comment>Limiting stocktake stock from the Sub Store</comment>
+    <sql>
+      INSERT INTO stockmgmt_operation_type_location_scope(stock_operation_type_id,location_tag,is_source,is_destination,creator,date_created,uuid)
+      SELECT sot.stock_operation_type_id,'Sub Store',1, 0,1,now(), '30552234-bde9-45cc-be94-f8576dcee16c'
+      FROM stockmgmt_stock_operation_type sot
+      WHERE uuid='88888888-8888-8888-8888-888888888888'
+    </sql>
+  </changeSet>
+
+  
+
+
 </databaseChangeLog>

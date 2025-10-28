@@ -62,6 +62,20 @@ public class LocationTagsSynchronize implements StartupTask {
 		}
 		return dispensary;
 	}
+    private LocationTag ensureSubStore(LocationService locationService) {
+        LocationTag subStore = locationService.getLocationTagByName(StockLocationTags.SUB_STORAGE_LOCATION_TAG);
+        if (subStore == null) {
+            log.debug("Created sub store tag");
+            subStore = new LocationTag();
+            subStore.setUuid("b973cb5a-2d9e-4a1e-ad7f-215f49f9577e");
+            subStore.setName(StockLocationTags.SUB_STORAGE_LOCATION_TAG);
+            subStore.setDescription("A sub storage location.");
+            subStore.setDateCreated(new Date());
+            subStore.setCreator(Context.getAuthenticatedUser());
+            subStore = locationService.saveLocationTag(subStore);
+        }
+        return subStore;
+    }   
 	
 	private Location getSuitableParentLocation(List<Location> locations){
         Map<Optional<Location>, List<Location>> parents = locations.stream().collect(Collectors.groupingBy(p -> Optional.ofNullable(p.getParentLocation())));
@@ -78,10 +92,12 @@ public class LocationTagsSynchronize implements StartupTask {
             LocationService locationService = Context.getLocationService();
             LocationTag mainStoreTag = ensureMainStore(locationService);
             LocationTag mainPharmacyTag = ensureMainPharmacy(locationService);
+            LocationTag subStoreTag = ensureSubStore(locationService);
             ensureDispensary(locationService);
 
             Location pharmacy = null;
             Location mainStore = null;
+            Location subStore = null;
 
             List<Location> locationsWithTag = locationService.getLocationsHavingAllTags(Arrays.asList(mainStoreTag));
             if(!locationsWithTag.isEmpty()){
@@ -100,6 +116,16 @@ public class LocationTagsSynchronize implements StartupTask {
                     pharmacy = tempLocation.get();
                 }else{
                     pharmacy = locationsWithTag.get(0);
+                }
+            }
+
+            locationsWithTag = locationService.getLocationsHavingAllTags(Arrays.asList(subStoreTag));
+            if(!locationsWithTag.isEmpty()){
+                Optional<Location> tempLocation = locationsWithTag.stream().filter(p->p.getRetired() == null || !p.getRetired()).findFirst();
+                if(tempLocation.isPresent()){
+                    subStore = tempLocation.get();
+                }else{
+                    subStore = locationsWithTag.get(0);
                 }
             }
 

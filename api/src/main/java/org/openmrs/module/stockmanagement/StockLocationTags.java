@@ -7,4 +7,6 @@ public class StockLocationTags {
 	public static final String MAIN_PHARMACY_LOCATION_TAG = "Main Pharmacy";
 	
 	public static final String DISPENSARY_LOCATION_TAG = "Dispensary";
+
+	public static final String SUB_STORAGE_LOCATION_TAG = "Sub Store";
 }

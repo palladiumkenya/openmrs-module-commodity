@@ -41,8 +41,6 @@ import org.openmrs.notification.Template;
 import org.openmrs.util.OpenmrsConstants;
 import org.springframework.util.Assert;
 
-import liquibase.pro.packaged.s;
-
 import javax.mail.Session;
 import java.math.BigDecimal;
 import java.nio.file.Path;
@@ -116,6 +114,11 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
         locationTag = locationService.getLocationTagByName(StockLocationTags.MAIN_STORE_LOCATION_TAG);
         if (locationTag != null)
             locationTags.add(locationTag);
+
+        locationTag = locationService.getLocationTagByName(StockLocationTags.SUB_STORAGE_LOCATION_TAG);
+        if (locationTag != null) {
+            locationTags.add(locationTag);
+        }
 
         if (locationTags.isEmpty()) {
             return new ArrayList<>();

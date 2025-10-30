@@ -5031,5 +5031,38 @@ CREATE TRIGGER stockmgmt_location_after_delete
 
   
 
+<!-- Changeset 1: Add unfulfillment tracking columns -->
+    <changeSet id="stockmgmt-add-unfulfillment-columns-20251027-1" author="makombe">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="stockmgmt_stock_item_transaction" columnName="unfulfillment_reason"/>
+            </not>
+        </preConditions>
+        <comment>Add columns to track unfulfillment reasons for zero quantity transactions</comment>
+        
+        <addColumn tableName="stockmgmt_stock_item_transaction">
+            <column name="unfulfillment_reason" type="VARCHAR(250)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        
+        <addColumn tableName="stockmgmt_stock_item_transaction">
+            <column name="unfulfillment_remarks" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+  <!-- Changeset 2: Modify stock_batch_id to allow NULL -->
+    <changeSet id="stockmgmt-allow-null-batch-id-20251027-2" author="makombe">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="stockmgmt_stock_item_transaction" columnName="stock_batch_id"/>
+        </preConditions>
+        <comment>Allow NULL values for stock_batch_id to support zero quantity transactions without batch</comment>
+        
+        <dropNotNullConstraint 
+            tableName="stockmgmt_stock_item_transaction" 
+            columnName="stock_batch_id" 
+            columnDataType="int"/>
+    </changeSet>
 
 </databaseChangeLog>

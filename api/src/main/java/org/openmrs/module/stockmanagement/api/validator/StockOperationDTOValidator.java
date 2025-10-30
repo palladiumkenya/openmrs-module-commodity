@@ -202,13 +202,13 @@ public class StockOperationDTOValidator implements Validator {
                 return;
             }
 
-            if(stockOperationType.requiresBatchUuid() && stockOperationItemDTO.getStockBatchUuid() == null){
+            if(stockOperationType.requiresBatchUuid() && stockOperationItemDTO.getStockBatchUuid() == null && !stockOperationType.getOperationType().equals(StockOperationType.STOCK_ISSUE)){
                 errors.rejectValue("stockOperationItems", String.format(messageSourceService.getMessage("stockmanagement.stockoperation.batchuuidrequired"), index));
                 return;
             }
 
             if(stockOperationType.requiresActualBatchInformation()) {
-                if (StringUtils.isBlank(stockOperationItemDTO.getBatchNo())) {
+                if (StringUtils.isBlank(stockOperationItemDTO.getBatchNo()) && !stockOperationType.getOperationType().equals(StockOperationType.STOCK_ISSUE)) {
                     errors.rejectValue("stockOperationItems", String.format(messageSourceService.getMessage("stockmanagement.stockoperation.batchnorequired"), index));
                     return;
                 }
@@ -235,7 +235,7 @@ public class StockOperationDTOValidator implements Validator {
             }
 
             if(stockOperationItemDTO.getQuantity() != null){
-                if(!stockOperationType.isNegativeItemQuantityAllowed() && stockOperationItemDTO.getQuantity().compareTo(zero) <= 0){
+                if(!stockOperationType.isNegativeItemQuantityAllowed() && stockOperationItemDTO.getQuantity().compareTo(zero) <= 0 && !stockOperationType.getOperationType().equals(StockOperationType.STOCK_ISSUE)){
                     errors.rejectValue("stockOperationItems", String.format(messageSourceService.getMessage("stockmanagement.stockoperation.qtyrequired"), index));
                     return;
                 }
@@ -253,7 +253,7 @@ public class StockOperationDTOValidator implements Validator {
 
             if(stockOperationType.getOperationType().equals(StockOperationType.STOCK_ISSUE)){
                 if(stockOperationItemDTO.getQuantityRequested() != null || stockOperationItemDTO.getStockItemPackagingUOMUuid() != null){
-                    if(stockOperationItemDTO.getQuantityRequested() != null && stockOperationItemDTO.getQuantityRequested().compareTo(zero) <= 0){
+                    if(stockOperationItemDTO.getQuantityRequested() != null && stockOperationItemDTO.getQuantityRequested().compareTo(zero) < 0){
                         errors.rejectValue("stockOperationItems", String.format(messageSourceService.getMessage("stockmanagement.stockoperation.qtyrequestedrequired"), index));
                         return;
                     }

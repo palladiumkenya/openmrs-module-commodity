@@ -2402,6 +2402,11 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                         balance = batchCurrentBalance.get().getQuantity();
                     }
                     BigDecimal netEffectBalance = balance.add(batchEffect);
+
+                    for (DispenseRequestProcessingInfo itemInGroup : itemGroupItems) {
+                        itemInGroup.setBalance(netEffectBalance);
+                    }
+
                     if (netEffectBalance.compareTo(BigDecimal.ZERO) < 0) {
                         String stockItemName = null;
                         if (stockItem.getDrug() != null) {
@@ -2464,6 +2469,7 @@ public class StockManagementServiceImpl extends BaseOpenmrsService implements St
                     stockItemTransaction.setStockItem(item.getStockItem());
                     stockItemTransaction.setStockBatch(item.getStockBatch());
                     stockItemTransaction.setQuantity(item.getQuantity().multiply(BigDecimal.valueOf(-1)));
+                    stockItemTransaction.setBalance(item.getBalance());
                     stockItemTransaction.setStockItemPackagingUOM(item.getPackagingUOM());
                     if (item.getOrder() != null) {
                         stockItemTransaction.setOrder(item.getOrder());

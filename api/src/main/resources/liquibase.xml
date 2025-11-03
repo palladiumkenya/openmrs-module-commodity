@@ -157,6 +157,9 @@
       <column name="quantity" type="DECIMAL(10,2)">
         <constraints nullable="false" />
       </column>
+      <column name="balance" type="DECIMAL(10,2)" defaultValueNumeric="0.00">
+        <constraints nullable="false" />
+      </column>
       <column name="stock_batch_id" type="INT">
         <constraints nullable="false" />
       </column>

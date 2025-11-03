@@ -3152,6 +3152,7 @@ public class StockManagementDao extends DaoBase {
                 return new Result<>(new ArrayList<>(), 0);
             }
             appendFilter(hqlFilter, "sit.party.id in (:permpartyIds)");
+            System.err.println("STOCK: Got party ids: " + partyIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
             parameterWithList.putIfAbsent("permpartyIds", partyIds);
         }
 

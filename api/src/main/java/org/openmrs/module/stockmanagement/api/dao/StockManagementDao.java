@@ -3121,6 +3121,7 @@ public class StockManagementDao extends DaoBase {
                 "so.operationNumber as stockOperationNumber,\n" +
                 "sot.name as stockOperationTypeName,\n" +
                 "sit.quantity as quantity," +
+                "sit.balance as balance," +
                 "sit.patient.id as patientId, sit.order.orderId as orderId, sit.encounter.encounterId as encounterId,\n" +
                 "so.source.id as operationSourcePartyId, so.destination.id as operationDestinationPartyId\n" +
                 "from stockmanagement.StockItemTransaction sit join\n" +
@@ -3152,6 +3153,7 @@ public class StockManagementDao extends DaoBase {
                 return new Result<>(new ArrayList<>(), 0);
             }
             appendFilter(hqlFilter, "sit.party.id in (:permpartyIds)");
+            System.err.println("STOCK: Got party ids: " + partyIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
             parameterWithList.putIfAbsent("permpartyIds", partyIds);
         }
 

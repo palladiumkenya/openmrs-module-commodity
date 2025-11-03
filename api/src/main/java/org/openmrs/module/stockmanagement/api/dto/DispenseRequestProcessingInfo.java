@@ -28,6 +28,8 @@ public class DispenseRequestProcessingInfo {
 	private StockBatch stockBatch;
 	
 	private BigDecimal quantity;
+
+	private BigDecimal balance;
 	
 	private StockItemPackagingUOM PackagingUOM;
 	
@@ -93,6 +95,14 @@ public class DispenseRequestProcessingInfo {
 	
 	public void setQuantity(BigDecimal quantity) {
 		this.quantity = quantity;
+	}
+
+	public BigDecimal getBalance() {
+		return balance;
+	}
+
+	public void setBalance(BigDecimal balance) {
+		this.balance = balance;
 	}
 	
 	public StockItemPackagingUOM getPackagingUOM() {

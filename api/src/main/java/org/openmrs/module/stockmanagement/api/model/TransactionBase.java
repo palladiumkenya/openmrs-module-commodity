@@ -51,6 +51,9 @@ public abstract class TransactionBase extends BaseOpenmrsObject implements Compa
 	
 	@Column(name = "quantity", nullable = false)
 	private BigDecimal quantity;
+
+	@Column(name = "balance", nullable = false, columnDefinition = "decimal(10,2) default 0.00")
+	private BigDecimal balance = BigDecimal.ZERO;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "stock_batch_id")
@@ -140,6 +143,14 @@ public abstract class TransactionBase extends BaseOpenmrsObject implements Compa
 	
 	public void setQuantity(BigDecimal quantity) {
 		this.quantity = quantity;
+	}
+
+	public BigDecimal getBalance() {
+		return balance;
+	}
+
+	public void setBalance(BigDecimal balance) {
+		this.balance = balance;
 	}
 	
 	public StockBatch getStockBatch() {

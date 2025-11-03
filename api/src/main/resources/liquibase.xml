@@ -157,9 +157,6 @@
       <column name="quantity" type="DECIMAL(10,2)">
         <constraints nullable="false" />
       </column>
-      <column name="balance" type="DECIMAL(10,2)" defaultValueNumeric="0.00">
-        <constraints nullable="false" />
-      </column>
       <column name="stock_batch_id" type="INT">
         <constraints nullable="false" />
       </column>
@@ -5035,7 +5032,7 @@ CREATE TRIGGER stockmgmt_location_after_delete
   
 
 <!-- Changeset 1: Add unfulfillment tracking columns -->
-    <changeSet id="stockmgmt-add-unfulfillment-columns-20251027-1" author="makombe">
+    <changeSet id="stockmanagement-add-unfulfillment-columns-20251027-1" author="makombe">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists tableName="stockmgmt_stock_item_transaction" columnName="unfulfillment_reason"/>
@@ -5056,7 +5053,7 @@ CREATE TRIGGER stockmgmt_location_after_delete
         </addColumn>
     </changeSet>
   <!-- Changeset 2: Modify stock_batch_id to allow NULL -->
-    <changeSet id="stockmgmt-allow-null-batch-id-20251027-2" author="makombe">
+    <changeSet id="stockmanagement-allow-null-batch-id-20251027-2" author="makombe">
         <preConditions onFail="MARK_RAN">
             <columnExists tableName="stockmgmt_stock_item_transaction" columnName="stock_batch_id"/>
         </preConditions>
@@ -5066,6 +5063,23 @@ CREATE TRIGGER stockmgmt_location_after_delete
             tableName="stockmgmt_stock_item_transaction" 
             columnName="stock_batch_id" 
             columnDataType="int"/>
+    </changeSet>
+
+    <!-- add balace column to track dispense transaction balances -->
+    <changeSet id="stockmanagement-add-balance-column-20251103" author="pwaweru">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="stockmgmt_stock_item_transaction" columnName="balance"/>
+            </not>
+        </preConditions>
+        <comment>
+            Adding balance column to the stockmgmt_stock_item_transaction table
+        </comment>
+        <addColumn tableName="stockmgmt_stock_item_transaction">
+            <column name="balance" type="DECIMAL(10,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

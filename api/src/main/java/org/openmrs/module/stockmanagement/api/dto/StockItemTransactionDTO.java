@@ -27,6 +27,8 @@ public class StockItemTransactionDTO {
 	private Integer encounterId;
 	
 	private BigDecimal quantity;
+
+	private BigDecimal balance;
 	
 	private String stockBatchUuid;
 	
@@ -294,4 +296,11 @@ public class StockItemTransactionDTO {
 		this.manufacturerName = manufacturerName;	
 	}
 
+	public BigDecimal getBalance() {
+		return balance;
+	}
+
+	public void setBalance(BigDecimal balance) {
+		this.balance = balance;
+	}
 }

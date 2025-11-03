@@ -1,31 +1,38 @@
 package org.openmrs.module.stockmanagement.web.resource;
 
-import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.properties.*;
-import io.swagger.models.properties.StringProperty;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.openmrs.module.stockmanagement.api.ModuleConstants;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
-import org.openmrs.module.stockmanagement.api.dto.*;
-import org.openmrs.module.stockmanagement.api.model.*;
+import org.openmrs.module.stockmanagement.api.dto.Result;
+import org.openmrs.module.stockmanagement.api.dto.StockItemTransactionDTO;
+import org.openmrs.module.stockmanagement.api.dto.StockItemTransactionSearchFilter;
+import org.openmrs.module.stockmanagement.api.model.Party;
+import org.openmrs.module.stockmanagement.api.model.StockItem;
+import org.openmrs.module.stockmanagement.api.model.StockOperation;
 import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.util.Date;
-import java.util.List;
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.properties.BooleanProperty;
+import io.swagger.models.properties.DateTimeProperty;
+import io.swagger.models.properties.DecimalProperty;
+import io.swagger.models.properties.IntegerProperty;
+import io.swagger.models.properties.StringProperty;
 
 @Resource(name = RestConstants.VERSION_1 + "/" + ModuleConstants.MODULE_ID + "/stockitemtransaction", supportedClass = StockItemTransactionDTO.class, supportedOpenmrsVersions = {
         "1.9.*", "1.10.*", "1.11.*", "1.12.*", "2.*" })
@@ -138,6 +145,7 @@ public class StockItemTransactionResource extends ResourceBase<StockItemTransact
 			description.addProperty("partyName");
 			description.addProperty("isPatientTransaction");
 			description.addProperty("quantity");
+			description.addProperty("balance");
 			description.addProperty("stockBatchUuid");
 			description.addProperty("stockBatchNo");
 			description.addProperty("expiration");
@@ -182,11 +190,17 @@ public class StockItemTransactionResource extends ResourceBase<StockItemTransact
 	public Model getGETModel(Representation rep) {
 		ModelImpl modelImpl = (ModelImpl) super.getGETModel(rep);
 		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-			modelImpl.property("uuid", new StringProperty()).property("dateCreated", new DateTimeProperty())
-			        .property("partyUuid", new StringProperty()).property("partyName", new StringProperty())
-			        .property("isPatientTransaction", new BooleanProperty()).property("quantity", new DecimalProperty())
-			        .property("stockBatchUuid", new StringProperty()).property("stockBatchNo", new StringProperty())
-			        .property("expiration", new StringProperty()).property("stockItemUuid", new StringProperty())
+			modelImpl.property("uuid", new StringProperty())
+					.property("dateCreated", new DateTimeProperty())
+			        .property("partyUuid", new StringProperty())
+					.property("partyName", new StringProperty())
+			        .property("isPatientTransaction", new BooleanProperty())
+					.property("quantity", new DecimalProperty())
+					.property("balance", new DecimalProperty())
+			        .property("stockBatchUuid", new StringProperty())
+					.property("stockBatchNo", new StringProperty())
+			        .property("expiration", new StringProperty())
+					.property("stockItemUuid", new StringProperty())
 			        .property("stockOperationUuid", new StringProperty())
 			        .property("stockOperationStatus", new StringProperty())
 			        .property("stockOperationNumber", new StringProperty())

@@ -5082,4 +5082,21 @@ CREATE TRIGGER stockmgmt_location_after_delete
         </addColumn>
     </changeSet>
 
+    <!-- add balace column to reservation transaction table-->
+    <changeSet id="stockmanagement-add-balance-column-reservation-20251124" author="makombe">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="stockmgmt_reservation_transaction" columnName="balance"/>
+            </not>
+        </preConditions>
+        <comment>
+            Adding balance column to the stockmgmt_reservation_transaction table
+        </comment>
+        <addColumn tableName="stockmgmt_reservation_transaction">
+            <column name="balance" type="DECIMAL(10,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
